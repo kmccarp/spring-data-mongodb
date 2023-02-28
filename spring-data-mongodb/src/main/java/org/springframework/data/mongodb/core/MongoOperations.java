@@ -471,38 +471,6 @@ public interface MongoOperations extends FluentMongoOperations {
 	<T> List<T> findAll(Class<T> entityClass, String collectionName);
 
 	/**
-	 * Query for a cursor window of objects of type T from the specified collection. <br />
-	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
-	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
-	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
-	 * to map objects since the test for class type is done in the client and not on the server.
-	 *
-	 * @param cursorRequest the cursor request.
-	 * @param entityType the parametrized type of the returned list.
-	 * @param collectionName name of the collection to retrieve the objects from.
-	 * @return the converted cursor window.
-	 * @see org.springframework.data.domain.OffsetCursorRequest
-	 * @see org.springframework.data.domain.KeysetCursorRequest
-	 */
-	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityTypee);
-
-	/**
-	 * Query for a cursor window of objects of type T from the specified collection. <br />
-	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
-	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
-	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
-	 * to map objects since the test for class type is done in the client and not on the server.
-	 *
-	 * @param cursorRequest the cursor request.
-	 * @param entityType the parametrized type of the returned list.
-	 * @param collectionName name of the collection to retrieve the objects from.
-	 * @return the converted cursor window.
-	 * @see org.springframework.data.domain.OffsetCursorRequest
-	 * @see org.springframework.data.domain.KeysetCursorRequest
-	 */
-	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType, String collectionName);
-
-	/**
 	 * Execute an aggregation operation. The raw results will be mapped to the given entity class. The name of the
 	 * inputCollection is derived from the inputType of the aggregation.
 	 *
@@ -837,6 +805,43 @@ public interface MongoOperations extends FluentMongoOperations {
 	 * @return the List of converted objects.
 	 */
 	<T> List<T> find(Query query, Class<T> entityClass, String collectionName);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param query the query class that specifies the criteria used to find a record and also an optional fields
+	 *          specification. Must not be {@literal null}.
+	 * @param entityType the parametrized type of the returned list.
+	 * @return the converted cursor window.
+	 * @since 4.1
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param query the query class that specifies the criteria used to find a record and also an optional fields
+	 *          specification. Must not be {@literal null}.
+	 * @param entityType the parametrized type of the returned list.
+	 * @param collectionName name of the collection to retrieve the objects from.
+	 * @return the converted cursor window.
+	 * @since 4.1
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType, String collectionName);
 
 	/**
 	 * Returns a document with the given id mapped onto the given class. The collection the query is ran against will be

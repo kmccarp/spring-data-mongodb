@@ -18,6 +18,9 @@ package org.springframework.data.mongodb.core;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.data.mongodb.core.query.Criteria.*;
 
+import reactor.test.StepVerifier;
+
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -30,20 +33,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.data.auditing.IsNewAwareAuditingHandler;
 import org.springframework.data.domain.CursorRequest;
 import org.springframework.data.domain.CursorWindow;
 import org.springframework.data.domain.KeysetCursorRequest;
 import org.springframework.data.domain.OffsetCursorRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mapping.context.PersistentEntities;
-import org.springframework.data.mongodb.core.MongoTemplateTests.PersonWithIdPropertyOfTypeUUIDListener;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.test.util.Client;
 import org.springframework.data.mongodb.test.util.MongoClientExtension;
-import org.springframework.data.mongodb.test.util.MongoTestTemplate;
+import org.springframework.data.mongodb.test.util.ReactiveMongoTestTemplate;
 
-import com.mongodb.client.MongoClient;
+import com.mongodb.reactivestreams.client.MongoClient;
 
 /**
  * Integration tests for {@link CursorWindow} queries.
@@ -51,7 +51,7 @@ import com.mongodb.client.MongoClient;
  * @author Mark Paluch
  */
 @ExtendWith(MongoClientExtension.class)
-class MongoTemplateCursorWindowingTests {
+class ReactiveMongoTemplateCursorWindowingTests {
 
 	static @Client MongoClient client;
 
@@ -59,7 +59,7 @@ class MongoTemplateCursorWindowingTests {
 
 	ConfigurableApplicationContext context = new GenericApplicationContext();
 
-	MongoTestTemplate template = new MongoTestTemplate(cfg -> {
+	private ReactiveMongoTestTemplate template = new ReactiveMongoTestTemplate(cfg -> {
 
 		cfg.configureDatabaseFactory(it -> {
 
@@ -67,26 +67,17 @@ class MongoTemplateCursorWindowingTests {
 			it.defaultDb(DB_NAME);
 		});
 
-		cfg.configureMappingContext(it -> {
-			it.autocreateIndex(false);
-			it.initialEntitySet(AuditablePerson.class);
-		});
-
 		cfg.configureApplicationContext(it -> {
 			it.applicationContext(context);
-			it.addEventListener(new PersonWithIdPropertyOfTypeUUIDListener());
-		});
-
-		cfg.configureAuditing(it -> {
-			it.auditingHandler(ctx -> {
-				return new IsNewAwareAuditingHandler(PersistentEntities.of(ctx));
-			});
 		});
 	});
 
 	@BeforeEach
 	void setUp() {
-		template.remove(Person.class).all();
+		template.remove(Person.class).all() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@ParameterizedTest // GH-4308
@@ -101,10 +92,14 @@ class MongoTemplateCursorWindowingTests {
 		Person jane_40 = new Person("Jane", 40);
 		Person jane_42 = new Person("Jane", 42);
 
-		template.insertAll(Arrays.asList(john20, john40_1, john40_2, jane_20, jane_40, jane_42));
+		template.insertAll(Arrays.asList(john20, john40_1, john40_2, jane_20, jane_40, jane_42)) //
+				.as(StepVerifier::create) //
+				.expectNextCount(6) //
+				.verifyComplete();
+
 		Query q = new Query(where("firstName").regex("J.*"));
 
-		CursorWindow<T> window = template.findWindow(cursorRequest, q, resultType, "person");
+		CursorWindow<T> window = template.findWindow(cursorRequest, q, resultType, "person").block(Duration.ofSeconds(10));
 
 		assertThat(window.isFirst()).isTrue();
 		assertThat(window.hasNext()).isTrue();
@@ -112,7 +107,8 @@ class MongoTemplateCursorWindowingTests {
 		assertThat(window).hasSize(2);
 		assertThat(window).containsOnly(assertionConverter.apply(jane_20), assertionConverter.apply(jane_40));
 
-		window = template.findWindow(window.nextCursorRequest().withSize(3), q, resultType, "person");
+		window = template.findWindow(window.nextCursorRequest().withSize(3), q, resultType, "person")
+				.block(Duration.ofSeconds(10));
 
 		assertThat(window.isFirst()).isFalse();
 		assertThat(window.hasNext()).isTrue();
@@ -121,7 +117,8 @@ class MongoTemplateCursorWindowingTests {
 		assertThat(window).contains(assertionConverter.apply(jane_42), assertionConverter.apply(john20));
 		assertThat(window).containsAnyOf(assertionConverter.apply(john40_1), assertionConverter.apply(john40_2));
 
-		window = template.findWindow(window.nextCursorRequest().withSize(1), q, resultType, "person");
+		window = template.findWindow(window.nextCursorRequest().withSize(1), q, resultType, "person")
+				.block(Duration.ofSeconds(10));
 
 		assertThat(window.isFirst()).isFalse();
 		assertThat(window.hasNext()).isFalse();
@@ -135,7 +132,8 @@ class MongoTemplateCursorWindowingTests {
 		Sort sort = Sort.by("firstName", "age");
 
 		return Stream.of(args(KeysetCursorRequest.ofSize(2, sort), Person.class, Function.identity()), //
-				args(KeysetCursorRequest.ofSize(2, sort), Document.class, MongoTemplateCursorWindowingTests::toDocument), //
+				args(KeysetCursorRequest.ofSize(2, sort), Document.class,
+						ReactiveMongoTemplateCursorWindowingTests::toDocument), //
 				args(OffsetCursorRequest.ofSize(2, sort), Person.class, Function.identity()));
 	}
 

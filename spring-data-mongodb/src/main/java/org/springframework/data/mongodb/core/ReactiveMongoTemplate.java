@@ -58,6 +58,10 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.convert.EntityReader;
+import org.springframework.data.domain.CursorRequest;
+import org.springframework.data.domain.CursorWindow;
+import org.springframework.data.domain.KeysetCursorRequest;
+import org.springframework.data.domain.OffsetCursorRequest;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.Metric;
@@ -71,6 +75,7 @@ import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseUtils;
 import org.springframework.data.mongodb.SessionSynchronization;
 import org.springframework.data.mongodb.core.CollectionPreparerSupport.ReactiveCollectionPreparerDelegate;
+import org.springframework.data.mongodb.core.CursorUtils.KeySetCursorQuery;
 import org.springframework.data.mongodb.core.EntityOperations.AdaptibleEntity;
 import org.springframework.data.mongodb.core.QueryOperations.AggregationDefinition;
 import org.springframework.data.mongodb.core.QueryOperations.CountContext;
@@ -827,6 +832,56 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 	}
 
 	@Override
+	public <T> Mono<CursorWindow<T>> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType) {
+
+		Assert.notNull(cursorRequest, "CursorRequest must not be null");
+		Assert.notNull(query, "Query must not be null");
+		Assert.notNull(entityType, "Entity type must not be null");
+
+		return findWindow(cursorRequest, query, entityType, getCollectionName(entityType));
+	}
+
+	@Override
+	// TODO: CursorRequest and Query declare both a Sort. Which one has precedence?
+	// CursorRequest is similar to Pageable in the sense of being required to define a sort order
+	public <T> Mono<CursorWindow<T>> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType,
+			String collectionName) {
+
+		Assert.notNull(cursorRequest, "CursorRequest must not be null");
+		Assert.notNull(query, "Query must not be null");
+		Assert.notNull(collectionName, "CollectionName must not be null");
+		Assert.notNull(entityType, "Entity type must not be null");
+
+		if (cursorRequest instanceof OffsetCursorRequest offset) {
+
+			int limit = offset.getSize() + 1;
+
+			Mono<List<T>> result = doFind(collectionName, ReactiveCollectionPreparerDelegate.of(query),
+					query.getQueryObject(), query.getFieldsObject(), entityType, new QueryFindPublisherPreparer(query,
+							new Query().with(cursorRequest.getSort()).getSortObject(), limit, offset.getOffset(), entityType))
+									.collectList();
+
+			return result.map(it -> CursorUtils.createWindow(offset, it));
+		}
+
+		if (cursorRequest instanceof KeysetCursorRequest keyset) {
+
+			int limit = keyset.getSize() + 1;
+
+			KeySetCursorQuery keysetPaginationQuery = CursorUtils.createKeysetPaginationQuery(query, keyset,
+					operations.getIdPropertyName(entityType));
+
+			Mono<List<T>> result = doFind(collectionName, ReactiveCollectionPreparerDelegate.of(query),
+					keysetPaginationQuery.query(), keysetPaginationQuery.fields(), entityType,
+					new QueryFindPublisherPreparer(query, keysetPaginationQuery.sort(), limit, 0, entityType)).collectList();
+
+			return result.map(it -> CursorUtils.createWindow(keyset, it, operations));
+		}
+
+		throw new UnsupportedOperationException(String.format("Not supported cursor request: %s", cursorRequest));
+	}
+
+	@Override
 	public <T> Mono<T> findById(Object id, Class<T> entityClass) {
 		return findById(id, entityClass, getCollectionName(entityClass));
 	}
@@ -1004,7 +1059,7 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 			optionsBuilder.readPreference(near.getReadPreference());
 		}
 
-		if(near.hasReadConcern()) {
+		if (near.hasReadConcern()) {
 			optionsBuilder.readConcern(near.getReadConcern());
 		}
 
@@ -2652,13 +2707,24 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 		return converter;
 	}
 
+	@Nullable
 	private Document getMappedSortObject(Query query, Class<?> type) {
 
 		if (query == null) {
 			return null;
 		}
 
-		return queryMapper.getMappedSort(query.getSortObject(), mappingContext.getPersistentEntity(type));
+		return getMappedSortObject(query.getSortObject(), type);
+	}
+
+	@Nullable
+	private Document getMappedSortObject(Document sortObject, Class<?> type) {
+
+		if (ObjectUtils.isEmpty(sortObject)) {
+			return null;
+		}
+
+		return queryMapper.getMappedSort(sortObject, mappingContext.getPersistentEntity(type));
 	}
 
 	// Callback implementations
@@ -3088,11 +3154,24 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 	class QueryFindPublisherPreparer implements FindPublisherPreparer {
 
 		private final Query query;
+
+		private final Document sortObject;
+
+		private final int limit;
+
+		private final long skip;
 		private final @Nullable Class<?> type;
 
 		QueryFindPublisherPreparer(Query query, @Nullable Class<?> type) {
+			this(query, query.getSortObject(), query.getLimit(), query.getSkip(), type);
+		}
+
+		QueryFindPublisherPreparer(Query query, Document sortObject, int limit, long skip, @Nullable Class<?> type) {
 
 			this.query = query;
+			this.sortObject = sortObject;
+			this.limit = limit;
+			this.skip = skip;
 			this.type = type;
 		}
 
@@ -3107,23 +3186,23 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 
 			HintFunction hintFunction = HintFunction.from(query.getHint());
 			Meta meta = query.getMeta();
-			if (query.getSkip() <= 0 && query.getLimit() <= 0 && ObjectUtils.isEmpty(query.getSortObject())
-					&& !hintFunction.isPresent() && !meta.hasValues()) {
+			if (skip <= 0 && limit <= 0 && ObjectUtils.isEmpty(sortObject) && !hintFunction.isPresent()
+					&& !meta.hasValues()) {
 				return findPublisherToUse;
 			}
 
 			try {
 
-				if (query.getSkip() > 0) {
-					findPublisherToUse = findPublisherToUse.skip((int) query.getSkip());
+				if (skip > 0) {
+					findPublisherToUse = findPublisherToUse.skip((int) skip);
 				}
 
-				if (query.getLimit() > 0) {
-					findPublisherToUse = findPublisherToUse.limit(query.getLimit());
+				if (limit > 0) {
+					findPublisherToUse = findPublisherToUse.limit(limit);
 				}
 
-				if (!ObjectUtils.isEmpty(query.getSortObject())) {
-					Document sort = type != null ? getMappedSortObject(query, type) : query.getSortObject();
+				if (!ObjectUtils.isEmpty(sortObject)) {
+					Document sort = type != null ? getMappedSortObject(sortObject, type) : sortObject;
 					findPublisherToUse = findPublisherToUse.sort(sort);
 				}
 

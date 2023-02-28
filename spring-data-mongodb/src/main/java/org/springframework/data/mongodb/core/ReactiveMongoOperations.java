@@ -25,7 +25,8 @@ import java.util.function.Supplier;
 import org.bson.Document;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-
+import org.springframework.data.domain.CursorRequest;
+import org.springframework.data.domain.CursorWindow;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -279,7 +280,8 @@ public interface ReactiveMongoOperations extends ReactiveFluentMongoOperations {
 	 * @param options additional settings to apply when creating the view. Can be {@literal null}.
 	 * @since 4.0
 	 */
-	Mono<MongoCollection<Document>> createView(String name, Class<?> source, AggregationPipeline pipeline, @Nullable ViewOptions options);
+	Mono<MongoCollection<Document>> createView(String name, Class<?> source, AggregationPipeline pipeline,
+			@Nullable ViewOptions options);
 
 	/**
 	 * Create a view with the provided name. The view content is defined by the {@link AggregationPipeline pipeline} on
@@ -291,7 +293,8 @@ public interface ReactiveMongoOperations extends ReactiveFluentMongoOperations {
 	 * @param options additional settings to apply when creating the view. Can be {@literal null}.
 	 * @since 4.0
 	 */
-	Mono<MongoCollection<Document>> createView(String name, String source, AggregationPipeline pipeline, @Nullable ViewOptions options);
+	Mono<MongoCollection<Document>> createView(String name, String source, AggregationPipeline pipeline,
+			@Nullable ViewOptions options);
 
 	/**
 	 * A set of collection names.
@@ -461,6 +464,44 @@ public interface ReactiveMongoOperations extends ReactiveFluentMongoOperations {
 	 * @return the {@link Flux} of converted objects.
 	 */
 	<T> Flux<T> find(Query query, Class<T> entityClass, String collectionName);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param query the query class that specifies the criteria used to find a record and also an optional fields
+	 *          specification. Must not be {@literal null}.
+	 * @param entityType the parametrized type of the returned list.
+	 * @return {@link Mono} emitting the converted cursor window.
+	 * @since 4.1
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> Mono<CursorWindow<T>> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param query the query class that specifies the criteria used to find a record and also an optional fields
+	 *          specification. Must not be {@literal null}.
+	 * @param entityType the parametrized type of the returned list.
+	 * @param collectionName name of the collection to retrieve the objects from.
+	 * @return {@link Mono} emitting the converted cursor window.
+	 * @since 4.1
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> Mono<CursorWindow<T>> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType,
+			String collectionName);
 
 	/**
 	 * Returns a document with the given id mapped onto the given class. The collection the query is ran against will be
