@@ -33,9 +33,9 @@ import org.springframework.util.Assert;
  */
 public class AggregationPipeline {
 
-	private final List<AggregationOperation> pipeline;
+	private final List<AggregationStage> pipeline;
 
-	public static AggregationPipeline of(AggregationOperation... stages) {
+	public static AggregationPipeline of(AggregationStage... stages) {
 		return new AggregationPipeline(Arrays.asList(stages));
 	}
 
@@ -51,7 +51,7 @@ public class AggregationPipeline {
 	 *
 	 * @param aggregationOperations must not be {@literal null}.
 	 */
-	public AggregationPipeline(List<AggregationOperation> aggregationOperations) {
+	public AggregationPipeline(List<? extends AggregationStage> aggregationOperations) {
 
 		Assert.notNull(aggregationOperations, "AggregationOperations must not be null");
 		pipeline = new ArrayList<>(aggregationOperations);
@@ -76,7 +76,7 @@ public class AggregationPipeline {
 	 *
 	 * @return never {@literal null}.
 	 */
-	public List<AggregationOperation> getOperations() {
+	public List<AggregationStage> getOperations() {
 		return Collections.unmodifiableList(pipeline);
 	}
 
@@ -95,14 +95,14 @@ public class AggregationPipeline {
 			return false;
 		}
 
-		AggregationOperation operation = pipeline.get(pipeline.size() - 1);
+		AggregationStage operation = pipeline.get(pipeline.size() - 1);
 		return isOut(operation) || isMerge(operation);
 	}
 
 	void verify() {
 
 		// check $out/$merge is the last operation if it exists
-		for (AggregationOperation operation : pipeline) {
+		for (AggregationStage operation : pipeline) {
 
 			if (isOut(operation) && !isLast(operation)) {
 				throw new IllegalArgumentException("The $out operator must be the last stage in the pipeline");
@@ -134,13 +134,13 @@ public class AggregationPipeline {
 		return pipeline.isEmpty();
 	}
 
-	private boolean containsOperation(Predicate<AggregationOperation> predicate) {
+	private boolean containsOperation(Predicate<AggregationStage> predicate) {
 
 		if (isEmpty()) {
 			return false;
 		}
 
-		for (AggregationOperation element : pipeline) {
+		for (AggregationStage element : pipeline) {
 			if (predicate.test(element)) {
 				return true;
 			}
@@ -149,19 +149,37 @@ public class AggregationPipeline {
 		return false;
 	}
 
-	private boolean isLast(AggregationOperation aggregationOperation) {
+	private boolean isLast(AggregationStage aggregationOperation) {
 		return pipeline.indexOf(aggregationOperation) == pipeline.size() - 1;
 	}
 
-	private static boolean isUnionWith(AggregationOperation operator) {
-		return operator instanceof UnionWithOperation || operator.getOperator().equals("$unionWith");
+	private static boolean isUnionWith(AggregationStage operator) {
+		if(operator instanceof UnionWithOperation) {
+			return true;
+		}
+		if(operator instanceof AggregationOperation operation) {
+			return operation.getOperator().equals("$unionWith");
+		}
+		return operator.toDocument(Aggregation.DEFAULT_CONTEXT).keySet().iterator().next().equals("$unionWith");
 	}
 
-	private static boolean isMerge(AggregationOperation operator) {
-		return operator instanceof MergeOperation || operator.getOperator().equals("$merge");
+	private static boolean isMerge(AggregationStage operator) {
+		if(operator instanceof MergeOperation) {
+			return true;
+		}
+		if(operator instanceof AggregationOperation operation) {
+			return operation.getOperator().equals("$merge");
+		}
+		return operator.toDocument(Aggregation.DEFAULT_CONTEXT).keySet().iterator().next().equals("$merge");
 	}
 
-	private static boolean isOut(AggregationOperation operator) {
-		return operator instanceof OutOperation || operator.getOperator().equals("$out");
+	private static boolean isOut(AggregationStage operator) {
+		if(operator instanceof OutOperation) {
+			return true;
+		}
+		if(operator instanceof AggregationOperation operation) {
+			return operation.getOperator().equals("$out");
+		}
+		return operator.toDocument(Aggregation.DEFAULT_CONTEXT).keySet().iterator().next().equals("$out");
 	}
 }

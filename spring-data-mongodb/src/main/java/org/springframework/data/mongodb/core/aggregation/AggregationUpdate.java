@@ -92,11 +92,11 @@ public class AggregationUpdate extends Aggregation implements UpdateDefinition {
 	 *
 	 * @param pipeline must not be {@literal null}.
 	 */
-	protected AggregationUpdate(List<AggregationOperation> pipeline) {
+	protected AggregationUpdate(List<? extends AggregationStage> pipeline) {
 
 		super(pipeline);
 
-		for (AggregationOperation operation : pipeline) {
+		for (AggregationStage operation : pipeline) {
 			if (operation instanceof FieldsExposingAggregationOperation) {
 				((FieldsExposingAggregationOperation) operation).getFields().forEach(it -> {
 					keysTouched.add(it.getName());
@@ -120,6 +120,15 @@ public class AggregationUpdate extends Aggregation implements UpdateDefinition {
 	 * @return new instance of {@link AggregationUpdate}.
 	 */
 	public static AggregationUpdate from(List<AggregationOperation> pipeline) {
+		return new AggregationUpdate(pipeline);
+	}
+
+	/**
+	 * Create a new AggregationUpdate from the given {@link AggregationOperation}s.
+	 *
+	 * @return new instance of {@link AggregationUpdate}.
+	 */
+	public static AggregationUpdate updateFrom(List<? extends AggregationStage> pipeline) {
 		return new AggregationUpdate(pipeline);
 	}
 

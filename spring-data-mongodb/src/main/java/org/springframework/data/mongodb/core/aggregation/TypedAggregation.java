@@ -15,6 +15,7 @@
  */
 package org.springframework.data.mongodb.core.aggregation;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -45,7 +46,17 @@ public class TypedAggregation<I> extends Aggregation {
 	 * @param inputType must not be {@literal null}.
 	 * @param operations must not be {@literal null} or empty.
 	 */
-	public TypedAggregation(Class<I> inputType, List<AggregationOperation> operations) {
+	public TypedAggregation(Class<I> inputType, AggregationStage... operations) {
+		this(inputType, Arrays.asList(operations));
+	}
+
+	/**
+	 * Creates a new {@link TypedAggregation} from the given {@link AggregationOperation}s.
+	 *
+	 * @param inputType must not be {@literal null}.
+	 * @param operations must not be {@literal null} or empty.
+	 */
+	public TypedAggregation(Class<I> inputType, List<? extends AggregationStage> operations) {
 		this(inputType, operations, DEFAULT_OPTIONS);
 	}
 
@@ -57,7 +68,7 @@ public class TypedAggregation<I> extends Aggregation {
 	 * @param operations must not be {@literal null} or empty.
 	 * @param options must not be {@literal null}.
 	 */
-	public TypedAggregation(Class<I> inputType, List<AggregationOperation> operations, AggregationOptions options) {
+	public TypedAggregation(Class<I> inputType, List<? extends AggregationStage> operations, AggregationOptions options) {
 
 		super(operations, options);
 

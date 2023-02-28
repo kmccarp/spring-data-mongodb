@@ -648,7 +648,7 @@ public class MongoTemplate
 			@Nullable ViewOptions options) {
 
 		return createView(name, getCollectionName(source),
-				queryOperations.createAggregation(Aggregation.newAggregation(source, pipeline.getOperations()), source),
+				queryOperations.createAggregation(Aggregation.aggregation(source, pipeline.getOperations()), source),
 				options);
 	}
 
@@ -657,7 +657,7 @@ public class MongoTemplate
 			@Nullable ViewOptions options) {
 
 		return createView(name, source,
-				queryOperations.createAggregation(Aggregation.newAggregation(pipeline.getOperations()), (Class<?>) null),
+				queryOperations.createAggregation(Aggregation.aggregationFrom(pipeline.getOperations()), (Class<?>) null),
 				options);
 	}
 

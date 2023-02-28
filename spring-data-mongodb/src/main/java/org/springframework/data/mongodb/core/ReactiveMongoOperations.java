@@ -15,6 +15,7 @@
  */
 package org.springframework.data.mongodb.core;
 
+import org.springframework.data.mongodb.core.aggregation.AggregationStage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -253,6 +254,18 @@ public interface ReactiveMongoOperations extends ReactiveFluentMongoOperations {
 	 * @since 4.0
 	 */
 	default Mono<MongoCollection<Document>> createView(String name, Class<?> source, AggregationOperation... stages) {
+		return createView(name, source, AggregationPipeline.of(stages));
+	}
+
+	/**
+	 * Create a view with the provided name. The view content is defined by the {@link AggregationOperation pipeline
+	 * stages} on another collection or view identified by the given {@link #getCollectionName(Class) source type}.
+	 *
+	 * @param name the name of the view to create.
+	 * @param source the type defining the views source collection.
+	 * @param stages the {@link AggregationOperation aggregation pipeline stages} defining the view content.
+	 */
+	default Mono<MongoCollection<Document>> createView(String name, Class<?> source, AggregationStage... stages) {
 		return createView(name, source, AggregationPipeline.of(stages));
 	}
 

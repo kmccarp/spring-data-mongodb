@@ -107,6 +107,15 @@ public class Aggregation {
 	 * @param operations must not be {@literal null} or empty.
 	 */
 	public static Aggregation newAggregation(List<? extends AggregationOperation> operations) {
+		return aggregationFrom(operations);
+	}
+
+	/**
+	 * Creates a new {@link Aggregation} from the given {@link AggregationOperation}s.
+	 *
+	 * @param operations must not be {@literal null} or empty.
+	 */
+	public static Aggregation aggregationFrom(List<? extends AggregationStage> operations) {
 		return newAggregation(operations.toArray(new AggregationOperation[operations.size()]));
 	}
 
@@ -131,6 +140,16 @@ public class Aggregation {
 	}
 
 	/**
+	 * Creates a new {@link AggregationUpdate} from the given {@link AggregationOperation}s.
+	 *
+	 * @param operations can be {@literal empty} but must not be {@literal null}.
+	 * @return new instance of {@link AggregationUpdate}.
+	 */
+	public static AggregationUpdate newUpdate(AggregationStage... operations) {
+		return AggregationUpdate.updateFrom(Arrays.asList(operations));
+	}
+
+	/**
 	 * Returns a copy of this {@link Aggregation} with the given {@link AggregationOptions} set. Note that options are
 	 * supported in MongoDB version 2.6+.
 	 *
@@ -151,6 +170,16 @@ public class Aggregation {
 	 * @param operations must not be {@literal null} or empty.
 	 */
 	public static <T> TypedAggregation<T> newAggregation(Class<T> type, List<? extends AggregationOperation> operations) {
+		return aggregation(type, operations);
+	}
+
+	/**
+	 * Creates a new {@link TypedAggregation} for the given type and {@link AggregationOperation}s.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param operations must not be {@literal null} or empty.
+	 */
+	public static <T> TypedAggregation<T> aggregation(Class<T> type, List<? extends AggregationStage> operations) {
 		return newAggregation(type, operations.toArray(new AggregationOperation[operations.size()]));
 	}
 
@@ -165,12 +194,31 @@ public class Aggregation {
 	}
 
 	/**
+	 * Creates a new {@link TypedAggregation} for the given type and {@link AggregationOperation}s.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param operations must not be {@literal null} or empty.
+	 */
+	public static <T> TypedAggregation<T> newAggregation(Class<T> type, AggregationStage... operations) {
+		return new TypedAggregation<T>(type, operations);
+	}
+
+	/**
 	 * Creates a new {@link Aggregation} from the given {@link AggregationOperation}s.
 	 *
 	 * @param aggregationOperations must not be {@literal null} or empty.
 	 */
 	protected Aggregation(AggregationOperation... aggregationOperations) {
 		this(asAggregationList(aggregationOperations));
+	}
+
+	/**
+	 * Creates a new {@link Aggregation} from the given {@link AggregationOperation}s.
+	 *
+	 * @param aggregationOperations must not be {@literal null} or empty.
+	 */
+	protected Aggregation(AggregationStage... aggregationOperations) {
+		this(Arrays.asList(aggregationOperations));
 	}
 
 	/**
@@ -189,7 +237,7 @@ public class Aggregation {
 	 *
 	 * @param aggregationOperations must not be {@literal null} or empty.
 	 */
-	protected Aggregation(List<AggregationOperation> aggregationOperations) {
+	protected Aggregation(List<? extends AggregationStage> aggregationOperations) {
 		this(aggregationOperations, DEFAULT_OPTIONS);
 	}
 
@@ -199,7 +247,7 @@ public class Aggregation {
 	 * @param aggregationOperations must not be {@literal null}.
 	 * @param options must not be {@literal null} or empty.
 	 */
-	protected Aggregation(List<AggregationOperation> aggregationOperations, AggregationOptions options) {
+	protected Aggregation(List<? extends AggregationStage> aggregationOperations, AggregationOptions options) {
 
 		Assert.notNull(aggregationOperations, "AggregationOperations must not be null");
 		Assert.notNull(options, "AggregationOptions must not be null");
