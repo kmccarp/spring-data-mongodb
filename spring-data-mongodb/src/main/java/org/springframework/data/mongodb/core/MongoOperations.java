@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.bson.Document;
+import org.springframework.data.domain.CursorRequest;
+import org.springframework.data.domain.CursorWindow;
 import org.springframework.data.geo.GeoResults;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -319,7 +321,8 @@ public interface MongoOperations extends FluentMongoOperations {
 	 * @param options additional settings to apply when creating the view. Can be {@literal null}.
 	 * @since 4.0
 	 */
-	MongoCollection<Document> createView(String name, Class<?> source, AggregationPipeline pipeline, @Nullable ViewOptions options);
+	MongoCollection<Document> createView(String name, Class<?> source, AggregationPipeline pipeline,
+			@Nullable ViewOptions options);
 
 	/**
 	 * Create a view with the provided name. The view content is defined by the {@link AggregationPipeline pipeline} on
@@ -331,7 +334,8 @@ public interface MongoOperations extends FluentMongoOperations {
 	 * @param options additional settings to apply when creating the view. Can be {@literal null}.
 	 * @since 4.0
 	 */
-	MongoCollection<Document> createView(String name, String source, AggregationPipeline pipeline, @Nullable ViewOptions options);
+	MongoCollection<Document> createView(String name, String source, AggregationPipeline pipeline,
+			@Nullable ViewOptions options);
 
 	/**
 	 * A set of collection names.
@@ -465,6 +469,38 @@ public interface MongoOperations extends FluentMongoOperations {
 	 * @return the converted collection.
 	 */
 	<T> List<T> findAll(Class<T> entityClass, String collectionName);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param entityType the parametrized type of the returned list.
+	 * @param collectionName name of the collection to retrieve the objects from.
+	 * @return the converted cursor window.
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityTypee);
+
+	/**
+	 * Query for a cursor window of objects of type T from the specified collection. <br />
+	 * The object is converted from the MongoDB native representation using an instance of {@see MongoConverter}. Unless
+	 * configured otherwise, an instance of {@link MappingMongoConverter} will be used. <br />
+	 * If your collection does not contain a homogeneous collection of types, this operation will not be an efficient way
+	 * to map objects since the test for class type is done in the client and not on the server.
+	 *
+	 * @param cursorRequest the cursor request.
+	 * @param entityType the parametrized type of the returned list.
+	 * @param collectionName name of the collection to retrieve the objects from.
+	 * @return the converted cursor window.
+	 * @see org.springframework.data.domain.OffsetCursorRequest
+	 * @see org.springframework.data.domain.KeysetCursorRequest
+	 */
+	<T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType, String collectionName);
 
 	/**
 	 * Execute an aggregation operation. The raw results will be mapped to the given entity class. The name of the
@@ -1175,7 +1211,7 @@ public interface MongoOperations extends FluentMongoOperations {
 	 * @param entityClass class that determines the collection to use. Must not be {@literal null}.
 	 * @return the count of matching documents.
 	 * @throws org.springframework.data.mapping.MappingException if the collection name cannot be
-	 * 	  {@link #getCollectionName(Class) derived} from the given type.
+	 *           {@link #getCollectionName(Class) derived} from the given type.
 	 * @see #exactCount(Query, Class)
 	 * @see #estimatedCount(Class)
 	 */

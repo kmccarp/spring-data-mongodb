@@ -44,6 +44,12 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.convert.EntityReader;
+import org.springframework.data.domain.CursorRequest;
+import org.springframework.data.domain.CursorWindow;
+import org.springframework.data.domain.KeysetCursorRequest;
+import org.springframework.data.domain.OffsetCursorRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.GeoResults;
@@ -58,6 +64,7 @@ import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.CollectionPreparerSupport.CollectionPreparerDelegate;
 import org.springframework.data.mongodb.core.DefaultBulkOperations.BulkOperationContext;
 import org.springframework.data.mongodb.core.EntityOperations.AdaptibleEntity;
+import org.springframework.data.mongodb.core.EntityOperations.Entity;
 import org.springframework.data.mongodb.core.QueryOperations.AggregationDefinition;
 import org.springframework.data.mongodb.core.QueryOperations.CountContext;
 import org.springframework.data.mongodb.core.QueryOperations.DeleteContext;
@@ -953,7 +960,7 @@ public class MongoTemplate
 			optionsBuilder.readPreference(near.getReadPreference());
 		}
 
-		if(near.hasReadConcern()) {
+		if (near.hasReadConcern()) {
 			optionsBuilder.readConcern(near.getReadConcern());
 		}
 
@@ -1801,6 +1808,130 @@ public class MongoTemplate
 						operations.forType(entityClass).getCollation().map(Collation::toMongoCollation).orElse(null)),
 				CursorPreparer.NO_OP_PREPARER, new ReadDocumentCallback<>(mongoConverter, entityClass, collectionName),
 				collectionName);
+	}
+
+	public <T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType) {
+		return findWindow(cursorRequest, query, entityType, getCollectionName(entityType));
+	}
+
+	@Override
+	public <T> CursorWindow<T> findWindow(CursorRequest cursorRequest, Query query, Class<T> entityType,
+			String collectionName) {
+
+		if (cursorRequest instanceof OffsetCursorRequest offset) {
+
+			int limit = offset.getSize() + 1;
+
+			List<T> result = doFind(collectionName, createDelegate(query), query.getQueryObject(), query.getFieldsObject(),
+					entityType, new QueryCursorPreparer(query, new Query().with(cursorRequest.getSort()).getSortObject(), limit,
+							offset.getOffset(), entityType));
+
+			return CursorUtils.createWindow(cursorRequest, result);
+		}
+
+		if (cursorRequest instanceof KeysetCursorRequest keyset) {
+
+			int limit = keyset.getSize() + 1;
+
+			Query keysetPaginationQuery = createKeysetPaginationQuery(query, keyset,
+					operations.getIdPropertyName(entityType));
+
+			List<T> result = doFind(collectionName, createDelegate(query), keysetPaginationQuery.getQueryObject(),
+					keysetPaginationQuery.getFieldsObject(), entityType,
+					new QueryCursorPreparer(query, keysetPaginationQuery.getSortObject(), limit, 0, entityType));
+
+			if (CursorUtils.hasMoreElements(cursorRequest, result)) {
+
+				Object last = result.get(keyset.getSize() - 1);
+				Entity<Object> entity = operations.forEntity(last);
+
+				Map<String, Object> keys = entity.extractKeys(cursorRequest.getSort());
+				cursorRequest = keyset.withNext(keys);
+			}
+
+			return CursorUtils.createWindow(cursorRequest, result);
+		}
+
+		throw new UnsupportedOperationException(String.format("Not supported cursor request: %s", cursorRequest));
+	}
+
+	/**
+	 * Create the actual query to run keyset-based pagination. Affects projection, sorting, and the criteria.
+	 *
+	 * @param query
+	 * @param cursorRequest
+	 * @param idPropertyName
+	 * @return
+	 */
+	private Query createKeysetPaginationQuery(Query query, KeysetCursorRequest cursorRequest, String idPropertyName) {
+
+		Sort targetSort = cursorRequest.getSort().and(Sort.by(Order.asc(idPropertyName)));
+
+		// make sure we can extract the keyset
+		Document fieldsObject = query.getFieldsObject();
+		if (!fieldsObject.isEmpty()) {
+			fieldsObject.put(idPropertyName, 1);
+			for (Order order : cursorRequest.getSort()) {
+				fieldsObject.put(order.getProperty(), 1);
+			}
+		}
+
+		Document sortObject = query.isSorted() ? query.getSortObject() : new Document();
+		targetSort.forEach(order -> sortObject.put(order.getProperty(), order.isAscending() ? 1 : -1));
+		sortObject.put(idPropertyName, 1);
+
+		Document queryObject = query.getQueryObject();
+
+		List<Document> or = (List<Document>) queryObject.getOrDefault("$or", new ArrayList<>());
+
+		Map<String, Object> keysetValues = cursorRequest.getKeys();
+		Document keysetSort = new Document();
+		List<String> sortKeys = new ArrayList<>(sortObject.keySet());
+
+		if (!keysetValues.isEmpty() && !keysetValues.keySet().containsAll(sortKeys)) {
+			throw new IllegalStateException("KeysetCursorRequest does not contain all keyset values");
+		}
+
+		// first query doesn't come with a keyset
+		if (!keysetValues.isEmpty()) {
+
+			// build matrix query for keyset paging that contains sort^2 queries
+			// reflecting a query that follows sort order semantics starting from the last returned keyset
+			for (int i = 0; i < sortKeys.size(); i++) {
+
+				Document sortConstraint = new Document();
+
+				for (int j = 0; j < sortKeys.size(); j++) {
+
+					String sortSegment = sortKeys.get(j);
+					int sortOrder = sortObject.getInteger(sortSegment);
+					Object o = keysetValues.get(sortSegment);
+
+					if (j >= i) { // tail segment
+						sortConstraint.put(sortSegment, new Document(sortOrder == 1 ? "$gt" : "$lt", o));
+						break;
+					}
+
+					sortConstraint.put(sortSegment, o);
+				}
+
+				if (!sortConstraint.isEmpty()) {
+					or.add(sortConstraint);
+				}
+			}
+		}
+
+		if (!keysetSort.isEmpty()) {
+			or.add(keysetSort);
+		}
+		if (!or.isEmpty()) {
+			queryObject.put("$or", or);
+		}
+
+		BasicQuery basicQuery = new BasicQuery(queryObject, fieldsObject);
+		basicQuery.setSortObject(sortObject);
+
+		return basicQuery;
 	}
 
 	@Override
@@ -2837,13 +2968,24 @@ public class MongoTemplate
 		return converter;
 	}
 
+	@Nullable
 	private Document getMappedSortObject(Query query, Class<?> type) {
 
-		if (query == null || ObjectUtils.isEmpty(query.getSortObject())) {
+		if (query == null) {
 			return null;
 		}
 
-		return queryMapper.getMappedSort(query.getSortObject(), mappingContext.getPersistentEntity(type));
+		return getMappedSortObject(query.getSortObject(), type);
+	}
+
+	@Nullable
+	private Document getMappedSortObject(Document sortObject, Class<?> type) {
+
+		if (ObjectUtils.isEmpty(sortObject)) {
+			return null;
+		}
+
+		return queryMapper.getMappedSort(sortObject, mappingContext.getPersistentEntity(type));
 	}
 
 	/**
@@ -3206,11 +3348,23 @@ public class MongoTemplate
 	class QueryCursorPreparer implements CursorPreparer {
 
 		private final Query query;
+
+		private final Document sortObject;
+
+		private final int limit;
+
+		private final long skip;
 		private final @Nullable Class<?> type;
 
 		QueryCursorPreparer(Query query, @Nullable Class<?> type) {
+			this(query, query.getSortObject(), query.getLimit(), query.getSkip(), type);
+		}
 
+		QueryCursorPreparer(Query query, Document sortObject, int limit, long skip, @Nullable Class<?> type) {
 			this.query = query;
+			this.sortObject = sortObject;
+			this.limit = limit;
+			this.skip = skip;
 			this.type = type;
 		}
 
@@ -3225,20 +3379,20 @@ public class MongoTemplate
 
 			Meta meta = query.getMeta();
 			HintFunction hintFunction = HintFunction.from(query.getHint());
-			if (query.getSkip() <= 0 && query.getLimit() <= 0 && ObjectUtils.isEmpty(query.getSortObject())
-					&& !hintFunction.isPresent() && !meta.hasValues() && !query.getCollation().isPresent()) {
+			if (skip <= 0 && limit <= 0 && ObjectUtils.isEmpty(sortObject) && !hintFunction.isPresent() && !meta.hasValues()
+					&& !query.getCollation().isPresent()) {
 				return cursorToUse;
 			}
 
 			try {
-				if (query.getSkip() > 0) {
-					cursorToUse = cursorToUse.skip((int) query.getSkip());
+				if (skip > 0) {
+					cursorToUse = cursorToUse.skip((int) skip);
 				}
-				if (query.getLimit() > 0) {
-					cursorToUse = cursorToUse.limit(query.getLimit());
+				if (limit > 0) {
+					cursorToUse = cursorToUse.limit(limit);
 				}
-				if (!ObjectUtils.isEmpty(query.getSortObject())) {
-					Document sort = type != null ? getMappedSortObject(query, type) : query.getSortObject();
+				if (!ObjectUtils.isEmpty(sortObject)) {
+					Document sort = type != null ? getMappedSortObject(sortObject, type) : sortObject;
 					cursorToUse = cursorToUse.sort(sort);
 				}
 
