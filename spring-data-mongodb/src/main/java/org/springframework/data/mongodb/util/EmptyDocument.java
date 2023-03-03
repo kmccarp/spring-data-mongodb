@@ -31,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
  */
 class EmptyDocument extends Document {
 
+	private static final long serialVersionUID = 1;
+
 	@Override
 	public Document append(String key, Object value) {
 		throw new UnsupportedOperationException();

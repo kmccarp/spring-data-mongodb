@@ -95,7 +95,13 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 
 	@Autowired MongoOperations operations;
 
-	Person dave, oliver, carter, boyd, stefan, leroi, alicia;
+	Person dave;
+	Person oliver;
+	Person carter;
+	Person boyd;
+	Person stefan;
+	Person leroi;
+	Person alicia;
 	QPerson person;
 
 	List<Person> all;
@@ -241,7 +247,7 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 	void findsPersonByShippingAddressesCorrectly() {
 
 		Address address = new Address("Foo Street 1", "C0123", "Bar");
-		dave.setShippingAddresses(new HashSet<Address>(asList(address)));
+		dave.setShippingAddresses(new HashSet<>(asList(address)));
 
 		repository.save(dave);
 		assertThat(repository.findByShippingAddresses(address)).isEqualTo(dave);
@@ -950,7 +956,7 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 	@ProvidesState
 	void sliceShouldTraverseElementsWithoutSkippingOnes() {
 
-		List<Person> persons = new ArrayList<Person>(100);
+		List<Person> persons = new ArrayList<>(100);
 		for (int i = 0; i < 100; i++) {
 			// format firstname to assert sorting retains proper order
 			persons.add(new Person(String.format("%03d", i), "ln" + 1, 100));
@@ -987,7 +993,7 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 
 		repository.deleteAll();
 
-		List<Person> persons = new ArrayList<Person>();
+		List<Person> persons = new ArrayList<>();
 
 		for (int i = 0; i < 3; i++) {
 			Person person = new Person(String.format("Siggi %s", i), "Bar", 30);
@@ -1009,7 +1015,7 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 	@ProvidesState
 	void shouldSupportSortingWithQSortByQueryDslOrderSpecifier() {
 
-		List<Person> persons = new ArrayList<Person>();
+		List<Person> persons = new ArrayList<>();
 
 		for (int i = 0; i < 3; i++) {
 			Person person = new Person(String.format("Siggi %s", i), "Bar", 30);
@@ -1030,7 +1036,7 @@ public abstract class AbstractPersonRepositoryIntegrationTests implements Dirtie
 	@ProvidesState
 	void shouldSupportSortingWithQSort() {
 
-		List<Person> persons = new ArrayList<Person>();
+		List<Person> persons = new ArrayList<>();
 
 		for (int i = 0; i < 3; i++) {
 			Person person = new Person(String.format("Siggi %s", i), "Bar", 30);

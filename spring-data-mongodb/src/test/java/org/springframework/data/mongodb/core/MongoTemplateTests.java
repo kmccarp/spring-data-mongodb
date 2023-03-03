@@ -16,9 +16,9 @@
 package org.springframework.data.mongodb.core;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
-import static org.springframework.data.mongodb.core.query.Update.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+import static org.springframework.data.mongodb.core.query.Update.update;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,7 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -96,7 +95,6 @@ import org.springframework.util.StringUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
-import com.mongodb.MongoException;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
@@ -151,9 +149,7 @@ public class MongoTemplateTests {
 		});
 
 		cfg.configureAuditing(it -> {
-			it.auditingHandler(ctx -> {
-				return new IsNewAwareAuditingHandler(PersistentEntities.of(ctx));
-			});
+			it.auditingHandler(ctx -> new IsNewAwareAuditingHandler(PersistentEntities.of(ctx)));
 		});
 	});
 
@@ -1170,24 +1166,13 @@ public class MongoTemplateTests {
 
 	@Test // DATAMONGO-2572
 	public void testUsingReadPreference() throws Exception {
-		this.template.execute("readPref", new CollectionCallback<Object>() {
-			public Object doInCollection(MongoCollection<org.bson.Document> collection)
-					throws MongoException, DataAccessException {
-
-				// assertThat(collection.getOptions(), is(0));
-				// assertThat(collection.read.getDB().getOptions(), is(0));
-				return null;
-			}
-		});
+		this.template.execute("readPref", collection -> null);
 		MongoTemplate secondaryTemplate = new MongoTemplate(factory);
 		secondaryTemplate.setReadPreference(ReadPreference.secondary());
-		secondaryTemplate.execute("readPref", new CollectionCallback<Object>() {
-			public Object doInCollection(MongoCollection<org.bson.Document> collection)
-					throws MongoException, DataAccessException {
-				assertThat(collection.getReadPreference()).isEqualTo(ReadPreference.secondary());
-				// assertThat(collection.getDB().getOptions(), is(0));
-				return null;
-			}
+		secondaryTemplate.execute("readPref", collection -> {
+			assertThat(collection.getReadPreference()).isEqualTo(ReadPreference.secondary());
+			// assertThat(collection.getDB().getOptions(), is(0));
+			return null;
 		});
 	}
 
@@ -1276,12 +1261,10 @@ public class MongoTemplateTests {
 		template.insert(new Person("Dick"));
 		template.insert(new Person("Harry"));
 		final List<String> names = new ArrayList<>();
-		template.executeQuery(new Query(), template.getCollectionName(Person.class), new DocumentCallbackHandler() {
-			public void processDocument(org.bson.Document document) {
-				String name = (String) document.get("firstName");
-				if (name != null) {
-					names.add(name);
-				}
+		template.executeQuery(new Query(), template.getCollectionName(Person.class), document -> {
+			String name = (String) document.get("firstName");
+			if (name != null) {
+				names.add(name);
 			}
 		});
 		assertThat(names.size()).isEqualTo(3);
@@ -1294,20 +1277,14 @@ public class MongoTemplateTests {
 		template.insert(new Person("Dick"));
 		template.insert(new Person("Harry"));
 		final List<String> names = new ArrayList<>();
-		template.executeQuery(new Query(), template.getCollectionName(Person.class), new DocumentCallbackHandler() {
-			public void processDocument(org.bson.Document document) {
-				String name = (String) document.get("firstName");
-				if (name != null) {
-					names.add(name);
-				}
+		template.executeQuery(new Query(), template.getCollectionName(Person.class), document -> {
+			String name = (String) document.get("firstName");
+			if (name != null) {
+				names.add(name);
 			}
-		}, new CursorPreparer() {
-
-			public FindIterable<org.bson.Document> prepare(FindIterable<org.bson.Document> iterable) {
-				iterable.limit(1);
-				return iterable;
-			}
-
+		}, iterable -> {
+			iterable.limit(1);
+			return iterable;
 		});
 		assertThat(names.size()).isEqualTo(1);
 		template.remove(new Query(), Person.class);
@@ -2067,17 +2044,13 @@ public class MongoTemplateTests {
 		Query q = Query.query(Criteria.where("value").in(EnumValue.VALUE2));
 
 		template.executeQuery(q, StringUtils.uncapitalize(ObjectWithEnumValue.class.getSimpleName()),
-				new DocumentCallbackHandler() {
+				document -> {
 
-					@Override
-					public void processDocument(org.bson.Document document) throws MongoException, DataAccessException {
+					assertThat(document).isNotNull();
 
-						assertThat(document).isNotNull();
+					ObjectWithEnumValue result = template.getConverter().read(ObjectWithEnumValue.class, document);
 
-						ObjectWithEnumValue result = template.getConverter().read(ObjectWithEnumValue.class, document);
-
-						assertThat(result.value).isEqualTo(EnumValue.VALUE2);
-					}
+					assertThat(result.value).isEqualTo(EnumValue.VALUE2);
 				});
 	}
 
@@ -2342,7 +2315,7 @@ public class MongoTemplateTests {
 	public void findAndModifyShouldAddTypeInformationWithinUpdatedTypeOnEmbeddedDocumentWithCollectionWhenRewriting()
 			throws Exception {
 
-		List<Model> models = Arrays.<Model> asList(new ModelA("value1"));
+		List<Model> models = Arrays. asList(new ModelA("value1"));
 
 		DocumentWithEmbeddedDocumentWithCollection doc = new DocumentWithEmbeddedDocumentWithCollection(
 				new DocumentWithCollection(models));
@@ -2540,16 +2513,14 @@ public class MongoTemplateTests {
 		assertThat(previous).isNotNull();
 		assertThat(previous.getAddress()).isEqualTo(person.address);
 
-		org.bson.Document loaded = template.execute(MyPerson.class, collection -> {
-			return collection.find(new org.bson.Document("name", "Heisenberg")).first();
-		});
+		org.bson.Document loaded = template.execute(MyPerson.class, collection -> collection.find(new org.bson.Document("name", "Heisenberg")).first());
 		assertThat(loaded.get("_id")).isEqualTo(new ObjectId(person.id));
 	}
 
 	@Test // DATAMONGO-407
 	public void updatesShouldRetainTypeInformationEvenForCollections() {
 
-		List<Model> models = Arrays.<Model> asList(new ModelA("foo"));
+		List<Model> models = Arrays. asList(new ModelA("foo"));
 
 		DocumentWithCollection doc = new DocumentWithCollection(models);
 		doc.id = "4711";
@@ -4073,7 +4044,7 @@ public class MongoTemplateTests {
 		String name;
 	}
 
-	static enum DateTimeToDateConverter implements Converter<LocalDateTime, Date> {
+	enum DateTimeToDateConverter implements Converter<LocalDateTime, Date> {
 
 		INSTANCE;
 
@@ -4082,7 +4053,7 @@ public class MongoTemplateTests {
 		}
 	}
 
-	static enum DateToDateTimeConverter implements Converter<Date, LocalDateTime> {
+	enum DateToDateTimeConverter implements Converter<Date, LocalDateTime> {
 
 		INSTANCE;
 
@@ -4154,7 +4125,8 @@ public class MongoTemplateTests {
 	static class VersionedPerson {
 
 		@Version Long version;
-		String id, firstname;
+		String id;
+		String firstname;
 		@Field(write = Field.Write.ALWAYS) String lastname;
 	}
 
@@ -4182,7 +4154,7 @@ public class MongoTemplateTests {
 		@Field("adr") Address address;
 	}
 
-	static enum EnumValue {
+	enum EnumValue {
 		VALUE1, VALUE2, VALUE3
 	}
 
@@ -4396,7 +4368,8 @@ public class MongoTemplateTests {
 	@RequiredArgsConstructor
 	static class SubdocumentWithWriteNull {
 
-		final String firstname, lastname;
+		final String firstname;
+		final String lastname;
 
 		@Field(write = Field.Write.ALWAYS) String nickname;
 	}

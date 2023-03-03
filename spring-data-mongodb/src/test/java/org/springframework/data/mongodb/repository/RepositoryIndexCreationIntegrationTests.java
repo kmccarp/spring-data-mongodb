@@ -15,7 +15,7 @@
  */
 package org.springframework.data.mongodb.repository;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,14 +27,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.index.IndexInfo;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 
 /**
@@ -52,22 +49,19 @@ public class RepositoryIndexCreationIntegrationTests {
 
 	@After
 	public void tearDown() {
-		operations.execute(Person.class, new CollectionCallback<Void>() {
+		operations.execute(Person.class, collection -> {
 
-			public Void doInCollection(MongoCollection<Document> collection) throws MongoException, DataAccessException {
+			List<Document> indexes = new ArrayList<>();
+			collection.listIndexes(Document.class).into(indexes);
 
-				List<Document> indexes = new ArrayList<Document>();
-				collection.listIndexes(Document.class).into(indexes);
-
-				for (Document index : indexes) {
-					String indexName = index.get("name").toString();
-					if (indexName.startsWith("find")) {
-						collection.dropIndex(indexName);
-					}
+			for (Document index : indexes) {
+				String indexName = index.get("name").toString();
+				if (indexName.startsWith("find")) {
+					collection.dropIndex(indexName);
 				}
-
-				return null;
 			}
+
+			return null;
 		});
 	}
 

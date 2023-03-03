@@ -879,7 +879,7 @@ public class QueryMapper {
 		}
 
 		public boolean isOrOrNor() {
-			return key.equalsIgnoreCase("$or") || key.equalsIgnoreCase("$nor");
+			return "$or".equalsIgnoreCase(key) || "$nor".equalsIgnoreCase(key);
 		}
 
 		/**
@@ -1300,12 +1300,8 @@ public class QueryMapper {
 		}
 
 		private boolean isPathToJavaLangClassProperty(PropertyPath path) {
-
-			if ((path.getType() == Class.class || path.getType().equals(Object.class))
-					&& path.getLeafProperty().getType() == Class.class) {
-				return true;
-			}
-			return false;
+			return (path.getType() == Class.class || path.getType().equals(Object.class))
+					&& path.getLeafProperty().getType() == Class.class;
 		}
 
 		/**

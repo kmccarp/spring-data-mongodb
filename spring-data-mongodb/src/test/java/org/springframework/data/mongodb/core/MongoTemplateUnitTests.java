@@ -46,7 +46,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -57,7 +56,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -380,13 +378,7 @@ public class MongoTemplateUnitTests extends MongoOperationsUnitTests {
 		MongoTemplate mongoTemplate = new MongoTemplate(factory, converter);
 		mongoTemplate.setApplicationContext(spy);
 
-		verify(spy, times(1)).addApplicationListener(argThat(new ArgumentMatcher<MongoPersistentEntityIndexCreator>() {
-
-			@Override
-			public boolean matches(MongoPersistentEntityIndexCreator argument) {
-				return argument.isIndexCreatorFor(mappingContext);
-			}
-		}));
+		verify(spy, times(1)).addApplicationListener(argThat(argument -> argument.isIndexCreatorFor(mappingContext)));
 	}
 
 	@Test // DATAMONGO-566
@@ -439,12 +431,8 @@ public class MongoTemplateUnitTests extends MongoOperationsUnitTests {
 	void sortShouldBeTakenAsIsWhenExecutingQueryWithoutSpecificTypeInformation() {
 
 		Query query = Query.query(Criteria.where("foo").is("bar")).with(Sort.by("foo"));
-		template.executeQuery(query, "collection1", new DocumentCallbackHandler() {
-
-			@Override
-			public void processDocument(Document document) throws MongoException, DataAccessException {
-				// nothing to do - just a test
-			}
+		template.executeQuery(query, "collection1", document -> {
+			// nothing to do - just a test
 		});
 
 		ArgumentCaptor<org.bson.Document> captor = ArgumentCaptor.forClass(org.bson.Document.class);

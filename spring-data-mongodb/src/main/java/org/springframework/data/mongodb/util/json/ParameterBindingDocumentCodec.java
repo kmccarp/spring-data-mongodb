@@ -15,9 +15,9 @@
  */
 package org.springframework.data.mongodb.util.json;
 
-import static java.util.Arrays.*;
-import static org.bson.assertions.Assertions.*;
-import static org.bson.codecs.configuration.CodecRegistries.*;
+import static java.util.Arrays.asList;
+import static org.bson.assertions.Assertions.notNull;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -118,12 +118,7 @@ public class ParameterBindingDocumentCodec implements CollectibleCodec<Document>
 		this.registry = notNull("registry", registry);
 		this.bsonTypeCodecMap = new BsonTypeCodecMap(notNull("bsonTypeClassMap", bsonTypeClassMap), registry);
 		this.idGenerator = new ObjectIdGenerator();
-		this.valueTransformer = valueTransformer != null ? valueTransformer : new Transformer() {
-			@Override
-			public Object transform(final Object value) {
-				return value;
-			}
-		};
+		this.valueTransformer = valueTransformer != null ? valueTransformer : value -> value;
 	}
 
 	@Override
@@ -167,7 +162,7 @@ public class ParameterBindingDocumentCodec implements CollectibleCodec<Document>
 	// Spring Data Customization START
 	public Document decode(@Nullable String json, Object[] values) {
 
-		return decode(json, new ParameterBindingContext((index) -> values[index], new SpelExpressionParser(),
+		return decode(json, new ParameterBindingContext(index -> values[index], new SpelExpressionParser(),
 				EvaluationContextProvider.DEFAULT.getEvaluationContext(values)));
 	}
 

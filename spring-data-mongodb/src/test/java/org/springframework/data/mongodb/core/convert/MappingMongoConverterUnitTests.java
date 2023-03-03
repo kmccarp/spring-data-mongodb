@@ -15,10 +15,11 @@
  */
 package org.springframework.data.mongodb.core.convert;
 
-import static java.time.ZoneId.*;
+import static java.time.ZoneId.systemDefault;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.data.mongodb.core.DocumentTestUtils.*;
+import static org.springframework.data.mongodb.core.DocumentTestUtils.assertTypeHint;
+import static org.springframework.data.mongodb.core.DocumentTestUtils.getAsDocument;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -349,16 +350,16 @@ class MappingMongoConverterUnitTests {
 	@Test // DATAMONGO-161
 	void readsNestedMapsCorrectly() {
 
-		Map<String, String> secondLevel = new HashMap<String, String>();
+		Map<String, String> secondLevel = new HashMap<>();
 		secondLevel.put("key1", "value1");
 		secondLevel.put("key2", "value2");
 
-		Map<String, Map<String, String>> firstLevel = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, String>> firstLevel = new HashMap<>();
 		firstLevel.put("level1", secondLevel);
 		firstLevel.put("level2", secondLevel);
 
 		ClassWithNestedMaps maps = new ClassWithNestedMaps();
-		maps.nestedMaps = new LinkedHashMap<String, Map<String, Map<String, String>>>();
+		maps.nestedMaps = new LinkedHashMap<>();
 		maps.nestedMaps.put("afield", firstLevel);
 
 		org.bson.Document document = new org.bson.Document();
@@ -463,7 +464,7 @@ class MappingMongoConverterUnitTests {
 	@Test // DATAMONGO-1509
 	void writesGenericTypeCorrectly() {
 
-		GenericType<Address> type = new GenericType<Address>();
+		GenericType<Address> type = new GenericType<>();
 		type.content = new Address();
 		type.content.city = "London";
 
@@ -554,7 +555,7 @@ class MappingMongoConverterUnitTests {
 	void writesMapsOfObjectsCorrectly() {
 
 		ClassWithMapProperty input = new ClassWithMapProperty();
-		input.mapOfObjects = new HashMap<String, Object>();
+		input.mapOfObjects = new HashMap<>();
 		input.mapOfObjects.put("Foo", Arrays.asList("Bar"));
 
 		org.bson.Document result = new org.bson.Document();
@@ -638,7 +639,7 @@ class MappingMongoConverterUnitTests {
 		Map<String, Locale> map = Collections.singletonMap("Foo", Locale.ENGLISH);
 
 		CollectionWrapper wrapper = new CollectionWrapper();
-		wrapper.listOfMaps = new ArrayList<Map<String, Locale>>();
+		wrapper.listOfMaps = new ArrayList<>();
 		wrapper.listOfMaps.add(map);
 
 		org.bson.Document result = new org.bson.Document();
@@ -692,9 +693,9 @@ class MappingMongoConverterUnitTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void testSaveMapWithACollectionAsValue() {
 
-		Map<String, Object> keyValues = new HashMap<String, Object>();
+		Map<String, Object> keyValues = new HashMap<>();
 		keyValues.put("string", "hello");
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("ping");
 		list.add("pong");
 		keyValues.put("list", list);
@@ -718,7 +719,7 @@ class MappingMongoConverterUnitTests {
 	void writesArraysAsMapValuesCorrectly() {
 
 		ClassWithMapProperty wrapper = new ClassWithMapProperty();
-		wrapper.mapOfObjects = new HashMap<String, Object>();
+		wrapper.mapOfObjects = new HashMap<>();
 		wrapper.mapOfObjects.put("foo", new String[] { "bar" });
 
 		org.bson.Document result = new org.bson.Document();
@@ -764,10 +765,10 @@ class MappingMongoConverterUnitTests {
 	@Test // DATAMONGO-329
 	void writesMapAsGenericFieldCorrectly() {
 
-		Map<String, A<String>> objectToSave = new HashMap<String, A<String>>();
-		objectToSave.put("test", new A<String>("testValue"));
+		Map<String, A<String>> objectToSave = new HashMap<>();
+		objectToSave.put("test", new A<>("testValue"));
 
-		A<Map<String, A<String>>> a = new A<Map<String, A<String>>>(objectToSave);
+		A<Map<String, A<String>>> a = new A<>(objectToSave);
 		org.bson.Document result = new org.bson.Document();
 
 		converter.write(a, result);
@@ -1150,21 +1151,14 @@ class MappingMongoConverterUnitTests {
 		person.firstname = "Dave";
 
 		ClassWithMapProperty entity = new ClassWithMapProperty();
-		entity.mapOfPersons = new HashMap<String, Person>();
+		entity.mapOfPersons = new HashMap<>();
 		entity.mapOfPersons.put("foo", person);
-		entity.mapOfObjects = new HashMap<String, Object>();
+		entity.mapOfObjects = new HashMap<>();
 		entity.mapOfObjects.put("foo", person);
 
 		CustomConversions conversions = new MongoCustomConversions(
-				Arrays.asList(new Converter<Person, org.bson.Document>() {
-
-					@Override
-					public org.bson.Document convert(Person source) {
-						return new org.bson.Document().append("firstname", source.firstname)//
-								.append("_class", Person.class.getName());
-					}
-
-				}, new Converter<org.bson.Document, Person>() {
+				Arrays.asList(source -> new org.bson.Document().append("firstname", source.firstname)//
+						.append("_class", Person.class.getName()), new Converter<org.bson.Document, Person>() {
 
 					@Override
 					public Person convert(org.bson.Document source) {
@@ -1336,7 +1330,7 @@ class MappingMongoConverterUnitTests {
 		person.firstname = "Dave";
 
 		ClassWithMapProperty source = new ClassWithMapProperty();
-		source.treeMapOfPersons = new TreeMap<String, Person>();
+		source.treeMapOfPersons = new TreeMap<>();
 		source.treeMapOfPersons.put("key", person);
 
 		org.bson.Document result = new org.bson.Document();
@@ -1586,11 +1580,11 @@ class MappingMongoConverterUnitTests {
 	@Test // DATAMONGO-1034
 	void rejectsBasicDbListToBeConvertedIntoComplexType() {
 
-		List<Object> inner = new ArrayList<Object>();
+		List<Object> inner = new ArrayList<>();
 		inner.add("key");
 		inner.add("value");
 
-		List<Object> outer = new ArrayList<Object>();
+		List<Object> outer = new ArrayList<>();
 		outer.add(inner);
 		outer.add(inner);
 
@@ -1727,7 +1721,7 @@ class MappingMongoConverterUnitTests {
 		converter.afterPropertiesSet();
 
 		ClassWithMapUsingEnumAsKey source = new ClassWithMapUsingEnumAsKey();
-		source.map = new HashMap<FooBarEnum, String>();
+		source.map = new HashMap<>();
 		source.map.put(FooBarEnum.FOO, "wohoo");
 
 		org.bson.Document target = new org.bson.Document();
@@ -1744,7 +1738,7 @@ class MappingMongoConverterUnitTests {
 		converter.afterPropertiesSet();
 
 		ClassWithMapUsingEnumAsKey source = new ClassWithMapUsingEnumAsKey();
-		source.map = new HashMap<FooBarEnum, String>();
+		source.map = new HashMap<>();
 		source.map.put(FooBarEnum.FOO, "spring");
 		source.map.put(FooBarEnum.BAR, "data");
 
@@ -1849,13 +1843,7 @@ class MappingMongoConverterUnitTests {
 
 		org.bson.Document document = new org.bson.Document("property", InterfacedEnum.INSTANCE.name());
 
-		Converter<String, SomeInterface> enumConverter = new Converter<String, SomeInterface>() {
-
-			@Override
-			public SomeInterface convert(String source) {
-				return InterfacedEnum.valueOf(source);
-			}
-		};
+		Converter<String, SomeInterface> enumConverter = MappingMongoConverterUnitTests.InterfacedEnum::valueOf;
 
 		converter.setCustomConversions(new MongoCustomConversions(Collections.singletonList(enumConverter)));
 		converter.afterPropertiesSet();
@@ -3075,8 +3063,8 @@ class MappingMongoConverterUnitTests {
 		@Field("property") private int m_property;
 
 		@PersistenceConstructor
-		public PrimitiveContainer(@Value("#root.property") int a_property) {
-			m_property = a_property;
+		public PrimitiveContainer(@Value("#root.property") int aProperty) {
+			m_property = aProperty;
 		}
 
 		public int property() {
@@ -3250,8 +3238,8 @@ class MappingMongoConverterUnitTests {
 	// DATACMNS-1278
 	static interface SomeInterface {}
 
-	static enum InterfacedEnum implements SomeInterface {
-		INSTANCE;
+	enum InterfacedEnum implements SomeInterface {
+		INSTANCE
 	}
 
 	static class DocWithInterfacedEnum {

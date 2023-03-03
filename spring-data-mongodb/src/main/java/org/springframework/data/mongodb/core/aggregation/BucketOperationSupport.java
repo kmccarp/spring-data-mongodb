@@ -133,12 +133,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 	 * @return never {@literal null}.
 	 */
 	public B andOutputCount() {
-		return andOutput(new AggregationExpression() {
-			@Override
-			public Document toDocument(AggregationOperationContext context) {
-				return new Document("$sum", 1);
-			}
-		});
+		return andOutput(context -> new Document("$sum", 1));
 	}
 
 	@Override
@@ -324,7 +319,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 			Assert.hasText(operation, "Operation must not be empty or null");
 			Assert.notNull(value, "Values must not be null");
 
-			List<Object> objects = new ArrayList<Object>(values.length + 1);
+			List<Object> objects = new ArrayList<>(values.length + 1);
 			objects.add(value);
 			objects.addAll(Arrays.asList(values));
 			return apply(new OperationOutput(operation, objects));
@@ -394,7 +389,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 		 * Creates a new, empty {@link Outputs}.
 		 */
 		private Outputs() {
-			this.outputs = new ArrayList<Output>();
+			this.outputs = new ArrayList<>();
 		}
 
 		/**
@@ -405,7 +400,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 		 */
 		private Outputs(Collection<Output> current, Output output) {
 
-			this.outputs = new ArrayList<Output>(current.size() + 1);
+			this.outputs = new ArrayList<>(current.size() + 1);
 			this.outputs.addAll(current);
 			this.outputs.add(output);
 		}
@@ -520,7 +515,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 			Assert.notNull(values, "Values must not be null");
 
 			this.operation = operation;
-			this.values = new ArrayList<Object>(values);
+			this.values = new ArrayList<>(values);
 		}
 
 		private OperationOutput(Field field, OperationOutput operationOutput) {
@@ -540,7 +535,7 @@ public abstract class BucketOperationSupport<T extends BucketOperationSupport<T,
 
 		protected List<Object> getOperationArguments(AggregationOperationContext context) {
 
-			List<Object> result = new ArrayList<Object>(values != null ? values.size() : 1);
+			List<Object> result = new ArrayList<>(values != null ? values.size() : 1);
 
 			for (Object element : values) {
 

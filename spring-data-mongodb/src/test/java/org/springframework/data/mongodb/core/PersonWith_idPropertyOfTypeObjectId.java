@@ -29,8 +29,8 @@ public class PersonWith_idPropertyOfTypeObjectId {
 		return _id;
 	}
 
-	public void set_id(ObjectId _id) {
-		this._id = _id;
+	public void set_id(ObjectId id) {
+		this._id = id;
 	}
 
 	public String getFirstName() {

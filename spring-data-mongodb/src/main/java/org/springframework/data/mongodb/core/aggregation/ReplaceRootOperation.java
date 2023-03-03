@@ -168,7 +168,7 @@ public class ReplaceRootOperation implements FieldsExposingAggregationOperation 
 	 */
 	public static class ReplaceRootDocumentOperation extends ReplaceRootOperation {
 
-		private final static ReplacementDocument EMPTY = new ReplacementDocument();
+		private static final ReplacementDocument EMPTY = new ReplacementDocument();
 		private final ReplacementDocument current;
 
 		/**
@@ -334,7 +334,7 @@ public class ReplaceRootOperation implements FieldsExposingAggregationOperation 
 		 * Creates an empty {@link ReplacementDocument}.
 		 */
 		protected ReplacementDocument() {
-			replacements = new ArrayList<ReplacementContributor>();
+			replacements = new ArrayList<>();
 		}
 
 		/**
@@ -407,7 +407,7 @@ public class ReplaceRootOperation implements FieldsExposingAggregationOperation 
 
 			ReplacementDocument replacementDocument = new ReplacementDocument();
 
-			List<ReplacementContributor> replacements = new ArrayList<ReplacementContributor>(
+			List<ReplacementContributor> replacements = new ArrayList<>(
 					this.replacements.size() + extension.replacements.size());
 
 			replacements.addAll(this.replacements);

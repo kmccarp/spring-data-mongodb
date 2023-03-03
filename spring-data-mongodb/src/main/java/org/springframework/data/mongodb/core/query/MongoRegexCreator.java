@@ -68,7 +68,7 @@ public enum MongoRegexCreator {
 		 */
 		REGEX,
 
-		LIKE;
+		LIKE
 	}
 
 	private static final Pattern PUNCTATION_PATTERN = Pattern.compile("\\p{Punct}");
@@ -122,7 +122,7 @@ public enum MongoRegexCreator {
 			return PUNCTATION_PATTERN.matcher(source).find() ? Pattern.quote(source) : source;
 		}
 
-		if (source.equals("*")) {
+		if ("*".equals(source)) {
 			return ".*";
 		}
 

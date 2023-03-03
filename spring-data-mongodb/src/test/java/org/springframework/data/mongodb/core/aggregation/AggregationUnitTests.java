@@ -180,7 +180,7 @@ public class AggregationUnitTests {
 	@Test // DATAMONGO-791
 	void allowAggregationOperationsToBePassedAsIterable() {
 
-		List<AggregationOperation> ops = new ArrayList<AggregationOperation>();
+		List<AggregationOperation> ops = new ArrayList<>();
 		ops.add(project("a"));
 		ops.add(group("a").count().as("aCnt"));
 		ops.add(project("aCnt", "a"));

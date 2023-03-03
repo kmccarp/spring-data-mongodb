@@ -53,7 +53,7 @@ class ReactiveChangeStreamOperationSupport implements ReactiveChangeStreamOperat
 		return new ReactiveChangeStreamSupport<>(template, domainType, domainType, null, null);
 	}
 
-	static class ReactiveChangeStreamSupport<T>
+	static final class ReactiveChangeStreamSupport<T>
 			implements ReactiveChangeStream<T>, ChangeStreamWithFilterAndProjection<T> {
 
 		private final ReactiveMongoTemplate template;

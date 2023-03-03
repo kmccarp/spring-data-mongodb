@@ -41,7 +41,7 @@ import org.springframework.data.util.TypeUtils;
  */
 public class LazyLoadingProxyAotProcessor {
 
-	private boolean generalLazyLoadingProxyContributed = false;
+	private boolean generalLazyLoadingProxyContributed;
 
 	public void registerLazyLoadingProxyIfNeeded(Class<?> type, GenerationContext generationContext) {
 
@@ -77,7 +77,7 @@ public class LazyLoadingProxyAotProcessor {
 					} else {
 
 						Class<?> proxyClass = LazyLoadingProxyFactory.resolveProxyType(field.getType(),
-								() -> LazyLoadingInterceptor.none());
+								LazyLoadingProxyFactory.LazyLoadingInterceptor::none);
 
 						// see: spring-projects/spring-framework/issues/29309
 						generationContext.getRuntimeHints().reflection().registerType(proxyClass,

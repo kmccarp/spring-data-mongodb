@@ -246,8 +246,8 @@ class EntityOperations {
 
 		try {
 			return Document.parse(source);
-		} catch (org.bson.json.JsonParseException o_O) {
-			throw new MappingException("Could not parse given String to save into a JSON document", o_O);
+		} catch (org.bson.json.JsonParseException oO) {
+			throw new MappingException("Could not parse given String to save into a JSON document", oO);
 		} catch (RuntimeException o_O) {
 
 			// legacy 3.x exception
@@ -703,7 +703,7 @@ class EntityOperations {
 		}
 	}
 
-	private static class AdaptibleMappedEntity<T> extends MappedEntity<T> implements AdaptibleEntity<T> {
+	private static final class AdaptibleMappedEntity<T> extends MappedEntity<T> implements AdaptibleEntity<T> {
 
 		private final MongoPersistentEntity<?> entity;
 		private final ConvertingPropertyAccessor<T> propertyAccessor;

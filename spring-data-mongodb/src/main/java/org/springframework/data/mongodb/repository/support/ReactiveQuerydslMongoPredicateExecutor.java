@@ -148,7 +148,7 @@ public class ReactiveQuerydslMongoPredicateExecutor<T> extends QuerydslPredicate
 		Assert.notNull(predicate, "Predicate must not be null");
 		Assert.notNull(queryFunction, "Query function must not be null");
 
-		return queryFunction.apply(new ReactiveFluentQuerydsl<S>(predicate, (Class<S>) typeInformation().getJavaType()));
+		return queryFunction.apply(new ReactiveFluentQuerydsl<>(predicate, (Class<S>) typeInformation().getJavaType()));
 	}
 
 	/**

@@ -44,7 +44,7 @@ public class LiteralNode extends ExpressionNode {
 
 	static {
 
-		Set<Class<?>> supportedTypes = new HashSet<Class<?>>(7, 1);
+		Set<Class<?>> supportedTypes = new HashSet<>(7, 1);
 		supportedTypes.add(BooleanLiteral.class);
 		supportedTypes.add(FloatLiteral.class);
 		supportedTypes.add(IntLiteral.class);

@@ -317,9 +317,7 @@ public class ReactiveTransactionIntegrationTests {
 			TransactionalOperator transactionalOperator = TransactionalOperator.create(manager,
 					new DefaultTransactionDefinition());
 
-			return transactionalOperator.execute(reactiveTransaction -> {
-				return operations.save(person);
-			});
+			return transactionalOperator.execute(reactiveTransaction -> operations.save(person));
 		}
 
 		@Transactional
@@ -328,11 +326,8 @@ public class ReactiveTransactionIntegrationTests {
 			TransactionalOperator transactionalOperator = TransactionalOperator.create(manager,
 					new DefaultTransactionDefinition());
 
-			return transactionalOperator.execute(reactiveTransaction -> {
-
-				return operations.save(person) //
-						.<Person> flatMap(it -> Mono.error(new RuntimeException("poof")));
-			});
+			return transactionalOperator.execute(reactiveTransaction -> operations.save(person) //
+						.<Person> flatMap(it -> Mono.error(new RuntimeException("poof"))));
 		}
 	}
 
@@ -342,7 +337,8 @@ public class ReactiveTransactionIntegrationTests {
 	static class Person {
 
 		ObjectId id;
-		String firstname, lastname;
+		String firstname;
+		String lastname;
 	}
 
 	@Data

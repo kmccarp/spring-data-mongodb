@@ -176,7 +176,6 @@ class AbstractMongoQueryUnitTests {
 		verify(withQueryMock).matching(captor.capture());
 
 		assertThat(captor.getValue().getMeta().getComment()).isNull();
-		;
 	}
 
 	@Test // DATAMONGO-957

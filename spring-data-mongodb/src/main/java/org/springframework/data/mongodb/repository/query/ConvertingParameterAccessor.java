@@ -166,7 +166,7 @@ public class ConvertingParameterAccessor implements MongoParameterAccessor {
 
 					Collection<?> values = asCollection(next);
 
-					List<DBRef> dbRefs = new ArrayList<DBRef>(values.size());
+					List<DBRef> dbRefs = new ArrayList<>(values.size());
 					for (Object element : values) {
 						dbRefs.add(writer.toDBRef(element, property));
 					}

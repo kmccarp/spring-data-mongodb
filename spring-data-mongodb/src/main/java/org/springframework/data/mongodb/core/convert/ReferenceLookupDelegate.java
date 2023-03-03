@@ -216,7 +216,7 @@ public final class ReferenceLookupDelegate {
 
 	ValueProvider valueProviderFor(Object source) {
 
-		return (index) -> {
+		return index -> {
 			if (source instanceof Document) {
 				return Streamable.of(((Document) source).values()).toList().get(index);
 			}
