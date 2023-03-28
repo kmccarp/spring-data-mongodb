@@ -59,8 +59,8 @@ public class BasicMongoPersistentProperty extends AnnotationBasedPersistentPrope
 
 	public static final String ID_FIELD_NAME = "_id";
 	private static final String LANGUAGE_FIELD_NAME = "language";
-	private static final Set<Class<?>> SUPPORTED_ID_TYPES = new HashSet<Class<?>>();
-	private static final Set<String> SUPPORTED_ID_PROPERTY_NAMES = new HashSet<String>();
+	private static final Set<Class<?>> SUPPORTED_ID_TYPES = new HashSet<>();
+	private static final Set<String> SUPPORTED_ID_PROPERTY_NAMES = new HashSet<>();
 
 	static {
 
@@ -225,7 +225,7 @@ public class BasicMongoPersistentProperty extends AnnotationBasedPersistentPrope
 
 	@Override
 	protected Association<MongoPersistentProperty> createAssociation() {
-		return new Association<MongoPersistentProperty>(this, null);
+		return new Association<>(this, null);
 	}
 
 	public boolean isDbReference() {

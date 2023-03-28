@@ -104,9 +104,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("simpleValueRef")).isEqualTo("ref-1");
 	}
@@ -124,9 +122,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("customIdTargetRef")).isEqualTo(expectedIdValue);
 	}
@@ -144,9 +140,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("mapValueRef", Map.class)).containsEntry("frodo", "ref-1").containsEntry("bilbo", "ref-2");
 	}
@@ -164,9 +158,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("customIdTargetRefMap", Map.class)).containsEntry("frodo", expectedIdValue);
 	}
@@ -183,9 +175,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("simpleValueRef", List.class)).containsExactly("ref-1", "ref-2");
 	}
@@ -203,9 +193,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("customIdTargetRefList", List.class)).containsExactly(expectedIdValue);
 	}
@@ -221,9 +209,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("objectValueRef")).isEqualTo(source.getObjectValueRef().toReference());
 	}
@@ -240,9 +226,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("objectValueRef", List.class)).containsExactly(
 				source.getObjectValueRef().get(0).toReference(), source.getObjectValueRef().get(1).toReference());
@@ -304,7 +288,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		SingleRefRoot result = template.findOne(query(where("id").is("id-1")), SingleRefRoot.class);
 
-		LazyLoadingTestUtils.assertProxy(result.simpleLazyValueRef, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(result.simpleLazyValueRef, proxy -> {
 
 			assertThat(proxy.isResolved()).isFalse();
 			assertThat(proxy.currentValue()).isNull();
@@ -514,7 +498,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		SingleRefRoot result = template.findOne(query(where("id").is("id-1")), SingleRefRoot.class);
 
-		LazyLoadingTestUtils.assertProxy(result.lazyObjectValueRefOnNonIdFields, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(result.lazyObjectValueRefOnNonIdFields, proxy -> {
 
 			assertThat(proxy.isResolved()).isFalse();
 			assertThat(proxy.currentValue()).isNull();
@@ -597,7 +581,7 @@ public class MongoTemplateDocumentReferenceTests {
 		WithRefA loadedA = template.query(WithRefA.class).matching(where("id").is(a.id)).firstValue();
 		assertThat(loadedA).isNotNull();
 		assertThat(loadedA.getToB()).isNotNull();
-		LazyLoadingTestUtils.assertProxy(loadedA.getToB().lazyToA, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(loadedA.getToB().lazyToA, proxy -> {
 
 			assertThat(proxy.isResolved()).isFalse();
 			assertThat(proxy.currentValue()).isNull();
@@ -646,15 +630,13 @@ public class MongoTemplateDocumentReferenceTests {
 		WithRefA loadedA = template.query(WithRefA.class).matching(where("id").is(a.id)).firstValue();
 		template.save(loadedA.getToB());
 
-		LazyLoadingTestUtils.assertProxy(loadedA.getToB().lazyToA, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(loadedA.getToB().lazyToA, proxy -> {
 
 			assertThat(proxy.isResolved()).isFalse();
 			assertThat(proxy.currentValue()).isNull();
 		});
 
-		Document target = template.execute(db -> {
-			return db.getCollection(collectionB).find(Filters.eq("_id", "b")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(collectionB).find(Filters.eq("_id", "b")).first());
 		assertThat(target.get("lazyToA", Object.class)).isEqualTo("a");
 	}
 
@@ -766,7 +748,7 @@ public class MongoTemplateDocumentReferenceTests {
 		WithLazyRequiredArgsCtor target = template.findOne(query(where("id").is(source.id)), WithLazyRequiredArgsCtor.class);
 
 		// proxy not yet resolved
-		LazyLoadingTestUtils.assertProxy(target.publisher, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(target.publisher, proxy -> {
 
 			assertThat(proxy.isResolved()).isFalse();
 			assertThat(proxy.currentValue()).isNull();
@@ -774,7 +756,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		// resolve the proxy by invoking a method on it
 		assertThat(target.getPublisher().getName()).isEqualTo("ppp");
-		LazyLoadingTestUtils.assertProxy(target.publisher, (proxy) -> {
+		LazyLoadingTestUtils.assertProxy(target.publisher, proxy -> {
 			assertThat(proxy.isResolved()).isTrue();
 		});
 	}
@@ -858,9 +840,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		String collectionA = template.getCollectionName(WithRefA.class);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(collectionA).find(Filters.eq("_id", "a")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(collectionA).find(Filters.eq("_id", "a")).first());
 
 		assertThat(target).containsEntry("toB", "b");
 	}
@@ -878,9 +858,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.update(SingleRefRoot.class).apply(new Update().set("simpleValueRef", ref)).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(collectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(collectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("simpleValueRef", "ref-1");
 	}
@@ -896,9 +874,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		String collectionA = template.getCollectionName(WithRefA.class);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(collectionA).find(Filters.eq("_id", "a")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(collectionA).find(Filters.eq("_id", "a")).first());
 
 		assertThat(target).containsEntry("toB", "b");
 	}
@@ -919,9 +895,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		String collection = template.getCollectionName(WithListOfRefs.class);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(collection).find(Filters.eq("_id", "a")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(collection).find(Filters.eq("_id", "a")).first());
 
 		assertThat(target).containsEntry("refs", Collections.singletonList("b"));
 	}
@@ -939,9 +913,7 @@ public class MongoTemplateDocumentReferenceTests {
 		template.update(SingleRefRoot.class).apply(new Update().set("customIdTargetRef",
 				new ObjectRefHavingCustomizedIdTargetType(expectedIdValue.toString(), "b"))).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("customIdTargetRef", expectedIdValue);
 	}
@@ -960,9 +932,7 @@ public class MongoTemplateDocumentReferenceTests {
 		template.update(CollectionRefRoot.class)
 				.apply(new Update().push("simpleValueRef").value(new SimpleObjectRef("ref-2", "boys"))).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("simpleValueRef", Arrays.asList("ref-1", "ref-2"));
 	}
@@ -980,9 +950,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.update(CollectionRefRoot.class).apply(new Update().push("simpleValueRef").value("ref-2")).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("simpleValueRef", Arrays.asList("ref-1", "ref-2"));
 	}
@@ -1002,9 +970,7 @@ public class MongoTemplateDocumentReferenceTests {
 		template.update(CollectionRefRoot.class)
 				.apply(new Update().set("mapValueRef.rise", new SimpleObjectRef("ref-2", "against"))).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("mapValueRef", new Document("beastie", "ref-1").append("rise", "ref-2"));
 	}
@@ -1022,9 +988,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.update(CollectionRefRoot.class).apply(new Update().set("mapValueRef.rise", "ref-2")).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target).containsEntry("mapValueRef", new Document("beastie", "ref-1").append("rise", "ref-2"));
 	}
@@ -1040,9 +1004,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(root);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(template.getCollectionName(SingleRefRoot.class)).find(Filters.eq("_id", root.id)).first();
-		});
+		Document target = template.execute(db -> db.getCollection(template.getCollectionName(SingleRefRoot.class)).find(Filters.eq("_id", root.id)).first());
 
 		assertThat(target).containsEntry("withReadingConverter",
 				new Document("ref-key-from-custom-write-converter", root.withReadingConverter.id));
@@ -1067,9 +1029,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(book);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(template.getCollectionName(Book.class)).find(Filters.eq("_id", book.id)).first();
-		});
+		Document target = template.execute(db -> db.getCollection(template.getCollectionName(Book.class)).find(Filters.eq("_id", book.id)).first());
 
 		assertThat(target).containsEntry("publisher", new Document("acc", publisher.acronym).append("n", publisher.name));
 
@@ -1095,9 +1055,7 @@ public class MongoTemplateDocumentReferenceTests {
 		template.update(Book.class).matching(where("id").is(book.id)).apply(new Update().set("publisher", publisher))
 				.first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(template.getCollectionName(Book.class)).find(Filters.eq("_id", book.id)).first();
-		});
+		Document target = template.execute(db -> db.getCollection(template.getCollectionName(Book.class)).find(Filters.eq("_id", book.id)).first());
 
 		assertThat(target).containsEntry("publisher", new Document("acc", publisher.acronym).append("n", publisher.name));
 
@@ -1142,9 +1100,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(root);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(template.getCollectionName(UsingAtReference.class)).find(Filters.eq("_id", root.id)).first();
-		});
+		Document target = template.execute(db -> db.getCollection(template.getCollectionName(UsingAtReference.class)).find(Filters.eq("_id", root.id)).first());
 
 		assertThat(target).containsEntry("publisher", "p-1");
 
@@ -1168,9 +1124,7 @@ public class MongoTemplateDocumentReferenceTests {
 		template.save(root);
 		template.update(UsingAtReference.class).matching(where("id").is(root.id)).apply(new Update().set("publisher", publisher)).first();
 
-		Document target = template.execute(db -> {
-			return db.getCollection(template.getCollectionName(UsingAtReference.class)).find(Filters.eq("_id", root.id)).first();
-		});
+		Document target = template.execute(db -> db.getCollection(template.getCollectionName(UsingAtReference.class)).find(Filters.eq("_id", root.id)).first());
 
 		assertThat(target).containsEntry("publisher", "p-1");
 	}
@@ -1216,9 +1170,7 @@ public class MongoTemplateDocumentReferenceTests {
 
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("simpleValueRef")).isEqualTo(id);
 	}
@@ -1259,9 +1211,7 @@ public class MongoTemplateDocumentReferenceTests {
 		source.customStringIdTargetRef = customStringIdTargetRef;
 		template.save(source);
 
-		Document target = template.execute(db -> {
-			return db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first();
-		});
+		Document target = template.execute(db -> db.getCollection(rootCollectionName).find(Filters.eq("_id", "root-1")).first());
 
 		assertThat(target.get("customStringIdTargetRef")).isEqualTo(id.toHexString());
 

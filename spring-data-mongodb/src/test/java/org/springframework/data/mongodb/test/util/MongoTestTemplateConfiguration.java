@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -97,12 +95,7 @@ public class MongoTestTemplateConfiguration {
 			callbacks = EntityCallbacks.create();
 		}
 
-		callbacks.addEntityCallback(new AuditingEntityCallback(new ObjectFactory<IsNewAwareAuditingHandler>() {
-			@Override
-			public IsNewAwareAuditingHandler getObject() throws BeansException {
-				return auditingConfigurer.auditingHandlerFunction.apply(converter.getMappingContext());
-			}
-		}));
+		callbacks.addEntityCallback(new AuditingEntityCallback(() -> auditingConfigurer.auditingHandlerFunction.apply(converter.getMappingContext())));
 		return callbacks;
 
 	}

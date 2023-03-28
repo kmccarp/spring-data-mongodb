@@ -67,7 +67,7 @@ public class MongoQueryMethod extends QueryMethod {
 	private final Map<Class<? extends Annotation>, Optional<Annotation>> annotationCache;
 
 	private @Nullable MongoEntityMetadata<?> metadata;
-	private Lazy<Boolean> isModifying = Lazy.of(this::resolveModifyingQueryIndicators);
+	private final Lazy<Boolean> isModifying = Lazy.of(this::resolveModifyingQueryIndicators);
 
 	/**
 	 * Creates a new {@link MongoQueryMethod} from the given {@link Method}.
@@ -146,7 +146,7 @@ public class MongoQueryMethod extends QueryMethod {
 
 			if (ClassUtils.isPrimitiveOrWrapper(returnedObjectType)) {
 
-				this.metadata = new SimpleMongoEntityMetadata<Object>((Class<Object>) domainClass,
+				this.metadata = new SimpleMongoEntityMetadata<>((Class<Object>) domainClass,
 						mappingContext.getRequiredPersistentEntity(domainClass));
 
 			} else {

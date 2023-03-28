@@ -136,7 +136,7 @@ class SubscriptionUtils {
 	 */
 	static class CollectingMessageListener<S, T> implements MessageListener<S, T> {
 
-		private volatile List<Message<S, T>> messages = new ArrayList<>();
+		private final volatile List<Message<S, T>> messages = new ArrayList<>();
 
 		@Override
 		public void onMessage(Message<S, T> message) {

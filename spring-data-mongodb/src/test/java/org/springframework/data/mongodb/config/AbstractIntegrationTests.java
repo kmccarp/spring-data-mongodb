@@ -15,7 +15,7 @@
  */
 package org.springframework.data.mongodb.config;
 
-import static org.springframework.data.mongodb.test.util.Assertions.*;
+import static org.springframework.data.mongodb.test.util.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Set;
@@ -26,15 +26,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.test.util.MongoClientClosingTestConfiguration;
 import org.springframework.data.mongodb.test.util.MongoTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 
@@ -77,13 +74,10 @@ public abstract class AbstractIntegrationTests {
 
 		for (String collectionName : operations.getCollectionNames()) {
 			if (!collectionName.startsWith("system")) {
-				operations.execute(collectionName, new CollectionCallback<Void>() {
-					@Override
-					public Void doInCollection(MongoCollection<Document> collection) throws MongoException, DataAccessException {
-						collection.deleteMany(new Document());
-						assertThat(collection.find().iterator().hasNext()).isFalse();
-						return null;
-					}
+				operations.execute(collectionName, collection -> {
+					collection.deleteMany(new Document());
+					assertThat(collection.find().iterator().hasNext()).isFalse();
+					return null;
 				});
 			}
 		}

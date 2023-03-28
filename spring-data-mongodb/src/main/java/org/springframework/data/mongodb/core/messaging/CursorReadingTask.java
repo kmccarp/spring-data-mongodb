@@ -235,11 +235,7 @@ abstract class CursorReadingTask<T, R> implements Task {
 			return false;
 		}
 
-		if (cursor.getServerCursor() == null || cursor.getServerCursor().getId() == 0) {
-			return false;
-		}
-
-		return true;
+		return !(cursor.getServerCursor() == null || cursor.getServerCursor().getId() == 0);
 	}
 
 	/**

@@ -15,9 +15,10 @@
  */
 package org.springframework.data.mongodb.core.geo;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.offset;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import lombok.Data;
 
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.geo.GeoResults;
@@ -42,7 +42,6 @@ import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
@@ -56,7 +55,6 @@ import org.springframework.data.mongodb.test.util.MongoClientExtension;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 
@@ -417,24 +415,19 @@ public class GeoJsonTests {
 	public void shouldConvertPointRepresentationCorrectlyWhenSourceCoordinatesUsesInteger() {
 
 		this.template.execute(template.getCollectionName(DocumentWithPropertyUsingGeoJsonType.class),
-				new CollectionCallback<Object>() {
+				collection -> {
 
-					@Override
-					public Object doInCollection(MongoCollection<org.bson.Document> collection)
-							throws MongoException, DataAccessException {
+					org.bson.Document pointRepresentation = new org.bson.Document();
+					pointRepresentation.put("type", "Point");
+					pointRepresentation.put("coordinates", new BasicDbListBuilder().add(0).add(0).get());
 
-						org.bson.Document pointRepresentation = new org.bson.Document();
-						pointRepresentation.put("type", "Point");
-						pointRepresentation.put("coordinates", new BasicDbListBuilder().add(0).add(0).get());
+					org.bson.Document document = new org.bson.Document();
+					document.append("_id", "datamongo-1453");
+					document.append("geoJsonPoint", pointRepresentation);
 
-						org.bson.Document document = new org.bson.Document();
-						document.append("_id", "datamongo-1453");
-						document.append("geoJsonPoint", pointRepresentation);
+					collection.insertOne(document);
 
-						collection.insertOne(document);
-
-						return document;
-					}
+					return document;
 				});
 
 		assertThat(template.findOne(query(where("id").is("datamongo-1453")),
@@ -445,26 +438,21 @@ public class GeoJsonTests {
 	public void shouldConvertLineStringRepresentationCorrectlyWhenSourceCoordinatesUsesInteger() {
 
 		this.template.execute(template.getCollectionName(DocumentWithPropertyUsingGeoJsonType.class),
-				new CollectionCallback<Object>() {
+				collection -> {
 
-					@Override
-					public Object doInCollection(MongoCollection<org.bson.Document> collection)
-							throws MongoException, DataAccessException {
+					org.bson.Document lineStringRepresentation = new org.bson.Document();
+					lineStringRepresentation.put("type", "LineString");
+					lineStringRepresentation.put("coordinates",
+							new BasicDbListBuilder().add(new BasicDbListBuilder().add(0).add(0).get())
+									.add(new BasicDbListBuilder().add(1).add(1).get()).get());
 
-						org.bson.Document lineStringRepresentation = new org.bson.Document();
-						lineStringRepresentation.put("type", "LineString");
-						lineStringRepresentation.put("coordinates",
-								new BasicDbListBuilder().add(new BasicDbListBuilder().add(0).add(0).get())
-										.add(new BasicDbListBuilder().add(1).add(1).get()).get());
+					org.bson.Document document = new org.bson.Document();
+					document.append("_id", "datamongo-1453");
+					document.append("geoJsonLineString", lineStringRepresentation);
 
-						org.bson.Document document = new org.bson.Document();
-						document.append("_id", "datamongo-1453");
-						document.append("geoJsonLineString", lineStringRepresentation);
+					collection.insertOne(document);
 
-						collection.insertOne(document);
-
-						return document;
-					}
+					return document;
 				});
 
 		assertThat(template.findOne(query(where("id").is("datamongo-1453")),

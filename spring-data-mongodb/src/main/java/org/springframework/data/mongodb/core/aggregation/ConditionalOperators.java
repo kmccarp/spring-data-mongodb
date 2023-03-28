@@ -238,7 +238,7 @@ public class ConditionalOperators {
 	 * @see <a href=
 	 *      "https://docs.mongodb.com/manual/reference/operator/aggregation/ifNull/">https://docs.mongodb.com/manual/reference/operator/aggregation/ifNull/</a>
 	 */
-	public static class IfNull implements AggregationExpression {
+	public static final class IfNull implements AggregationExpression {
 
 		private final Object condition;
 		private final Object value;
@@ -278,7 +278,7 @@ public class ConditionalOperators {
 		@Override
 		public Document toDocument(AggregationOperationContext context) {
 
-			List<Object> list = new ArrayList<Object>();
+			List<Object> list = new ArrayList<>();
 
 			if (condition instanceof Collection) {
 				for (Object val : ((Collection) this.condition)) {
@@ -452,7 +452,7 @@ public class ConditionalOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Switch extends AbstractAggregationExpression {
+	public static final class Switch extends AbstractAggregationExpression {
 
 		private Switch(java.util.Map<String, Object> values) {
 			super(values);
@@ -498,7 +498,7 @@ public class ConditionalOperators {
 		/**
 		 * Encapsulates the aggregation framework case document inside a {@code $switch}-operation.
 		 */
-		public static class CaseOperator implements AggregationExpression {
+		public static final class CaseOperator implements AggregationExpression {
 
 			private final AggregationExpression when;
 			private final Object then;
@@ -513,14 +513,10 @@ public class ConditionalOperators {
 
 				Assert.notNull(condition, "Condition must not be null");
 
-				return new ThenBuilder() {
+				return value -> {
 
-					@Override
-					public CaseOperator then(Object value) {
-
-						Assert.notNull(value, "Value must not be null");
-						return new CaseOperator(condition, value);
-					}
+					Assert.notNull(value, "Value must not be null");
+					return new CaseOperator(condition, value);
 				};
 			}
 
@@ -568,7 +564,7 @@ public class ConditionalOperators {
 	 * @see <a href=
 	 *      "https://docs.mongodb.com/manual/reference/operator/aggregation/cond/">https://docs.mongodb.com/manual/reference/operator/aggregation/cond/</a>
 	 */
-	public static class Cond implements AggregationExpression {
+	public static final class Cond implements AggregationExpression {
 
 		private final Object condition;
 		private final Object thenValue;
@@ -659,7 +655,7 @@ public class ConditionalOperators {
 
 		private List<Object> getClauses(AggregationOperationContext context, Document mappedObject) {
 
-			List<Object> clauses = new ArrayList<Object>();
+			List<Object> clauses = new ArrayList<>();
 
 			for (String key : mappedObject.keySet()) {
 
@@ -672,12 +668,12 @@ public class ConditionalOperators {
 
 		private List<Object> getClauses(AggregationOperationContext context, String key, Object predicate) {
 
-			List<Object> clauses = new ArrayList<Object>();
+			List<Object> clauses = new ArrayList<>();
 
 			if (predicate instanceof List) {
 
 				List<?> predicates = (List<?>) predicate;
-				List<Object> args = new ArrayList<Object>(predicates.size());
+				List<Object> args = new ArrayList<>(predicates.size());
 
 				for (Object clause : (List<?>) predicate) {
 					if (clause instanceof Document) {
@@ -696,14 +692,14 @@ public class ConditionalOperators {
 						continue;
 					}
 
-					List<Object> args = new ArrayList<Object>(2);
+					List<Object> args = new ArrayList<>(2);
 					args.add("$" + key);
 					args.add(nested.get(s));
 					clauses.add(new Document(s, args));
 				}
 			} else if (!isKeyword(key)) {
 
-				List<Object> args = new ArrayList<Object>(2);
+				List<Object> args = new ArrayList<>(2);
 				args.add("$" + key);
 				args.add(predicate);
 				clauses.add(new Document("$eq", args));
@@ -872,7 +868,7 @@ public class ConditionalOperators {
 		 *
 		 * @author Mark Paluch
 		 */
-		static class ConditionalExpressionBuilder implements WhenBuilder, ThenBuilder, OtherwiseBuilder {
+		static final class ConditionalExpressionBuilder implements WhenBuilder, ThenBuilder, OtherwiseBuilder {
 
 			private @Nullable Object condition;
 			private @Nullable Object thenValue;

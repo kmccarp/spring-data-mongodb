@@ -27,8 +27,8 @@ public class PersonWith_idPropertyOfTypeString {
 		return _id;
 	}
 
-	public void set_id(String _id) {
-		this._id = _id;
+	public void set_id(String id) {
+		this._id = id;
 	}
 
 	public String getFirstName() {

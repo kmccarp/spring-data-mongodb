@@ -82,7 +82,7 @@ import com.mongodb.MongoClientSettings;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class StringBasedAggregationUnitTests {
 
-	private SpelExpressionParser PARSER = new SpelExpressionParser();
+	private SpelExpressionParser parser = new SpelExpressionParser();
 
 	@Mock MongoOperations operations;
 	@Mock DbRefResolver dbRefResolver;
@@ -254,7 +254,7 @@ public class StringBasedAggregationUnitTests {
 				factory, converter.getMappingContext());
 
 		assertThatExceptionOfType(InvalidMongoDbApiUsageException.class) //
-				.isThrownBy(() -> new StringBasedAggregation(queryMethod, operations, PARSER,
+				.isThrownBy(() -> new StringBasedAggregation(queryMethod, operations, parser,
 						QueryMethodEvaluationContextProvider.DEFAULT)) //
 				.withMessageContaining("pageIsUnsupported") //
 				.withMessageContaining("Page");
@@ -281,7 +281,7 @@ public class StringBasedAggregationUnitTests {
 		ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
 		MongoQueryMethod queryMethod = new MongoQueryMethod(method, new DefaultRepositoryMetadata(SampleRepository.class),
 				factory, converter.getMappingContext());
-		return new StringBasedAggregation(queryMethod, operations, PARSER, QueryMethodEvaluationContextProvider.DEFAULT);
+		return new StringBasedAggregation(queryMethod, operations, parser, QueryMethodEvaluationContextProvider.DEFAULT);
 	}
 
 	private List<Document> pipelineOf(AggregationInvocation invocation) {

@@ -936,7 +936,7 @@ public class MongoTemplate
 		String mappedFieldName = distinctQueryContext.getMappedFieldName(entity);
 		Class<T> mongoDriverCompatibleType = distinctQueryContext.getDriverCompatibleClass(resultClass);
 
-		MongoIterable<?> result = execute(collectionName, (collection) -> {
+		MongoIterable<?> result = execute(collectionName, collection -> {
 
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug(String.format("Executing findDistinct using query %s for field: %s in collection: %s",
@@ -956,7 +956,7 @@ public class MongoTemplate
 			MongoConverter converter = getConverter();
 			DefaultDbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoDbFactory);
 
-			result = result.map((source) -> converter.mapValueToTargetType(source,
+			result = result.map(source -> converter.mapValueToTargetType(source,
 					distinctQueryContext.getMostSpecificConversionTargetType(resultClass, entityClass), dbRefResolver));
 		}
 
@@ -1023,7 +1023,7 @@ public class MongoTemplate
 		}
 
 		Distance avgDistance = new Distance(
-				result.size() == 0 ? 0 : aggregate.divide(new BigDecimal(result.size()), RoundingMode.HALF_UP).doubleValue(),
+				result.isEmpty() ? 0 : aggregate.divide(new BigDecimal(result.size()), RoundingMode.HALF_UP).doubleValue(),
 				near.getMetric());
 
 		return new GeoResults<>(result, avgDistance);
@@ -1459,7 +1459,7 @@ public class MongoTemplate
 		// Bump version number
 		T toSave = source.incrementVersion();
 
-		toSave = maybeEmitEvent(new BeforeConvertEvent<T>(toSave, collectionName)).getSource();
+		toSave = maybeEmitEvent(new BeforeConvertEvent<>(toSave, collectionName)).getSource();
 		toSave = maybeCallBeforeConvert(toSave, collectionName);
 
 		if (source.getBean() != toSave) {
@@ -2112,7 +2112,7 @@ public class MongoTemplate
 			}
 
 			Document commandResult = executeCommand(command);
-			return new AggregationResults<>(commandResult.get("results", new ArrayList<Document>(0)).stream()
+			return new AggregationResults<>(commandResult.get("results", new ArrayList<>(0)).stream()
 					.map(callback::doWith).collect(Collectors.toList()), commandResult);
 		}
 

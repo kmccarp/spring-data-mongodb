@@ -35,6 +35,8 @@ import org.springframework.util.Assert;
  */
 public class Sphere implements Shape {
 
+	private static final long serialVersionUID = 1;
+
 	public static final String COMMAND = "$centerSphere";
 	private final Point center;
 	private final Distance radius;

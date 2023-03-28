@@ -146,13 +146,10 @@ public class IndexingIntegrationTests {
 
 		operations.getConverter().getMappingContext().getPersistentEntity(WithSpelIndexTimeout.class);
 
-		Optional<org.bson.Document> indexInfo = operations.execute("withSpelIndexTimeout", collection -> {
-
-			return collection.listIndexes(org.bson.Document.class).into(new ArrayList<>()) //
+		Optional<org.bson.Document> indexInfo = operations.execute("withSpelIndexTimeout", collection -> collection.listIndexes(org.bson.Document.class).into(new ArrayList<>()) //
 					.stream() //
 					.filter(it -> it.get("name").equals("someString")) //
-					.findFirst();
-		});
+					.findFirst());
 
 		assertThat(indexInfo).isPresent();
 		assertThat(indexInfo.get()).hasEntrySatisfying("expireAfterSeconds", timeout -> {

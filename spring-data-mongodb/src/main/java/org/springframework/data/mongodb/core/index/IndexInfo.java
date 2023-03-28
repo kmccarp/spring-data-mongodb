@@ -78,7 +78,7 @@ public class IndexInfo {
 		Document keyDbObject = (Document) sourceDocument.get("key");
 		int numberOfElements = keyDbObject.keySet().size();
 
-		List<IndexField> indexFields = new ArrayList<IndexField>(numberOfElements);
+		List<IndexField> indexFields = new ArrayList<>(numberOfElements);
 
 		for (String key : keyDbObject.keySet()) {
 
@@ -175,7 +175,7 @@ public class IndexInfo {
 
 		Assert.notNull(keys, "Collection of keys must not be null");
 
-		List<String> indexKeys = new ArrayList<String>(indexFields.size());
+		List<String> indexKeys = new ArrayList<>(indexFields.size());
 
 		for (IndexField field : indexFields) {
 			indexKeys.add(field.getKey());
@@ -323,10 +323,7 @@ public class IndexInfo {
 		if (!ObjectUtils.nullSafeEquals(collation, other.collation)) {
 			return false;
 		}
-		if (!ObjectUtils.nullSafeEquals(expireAfter, other.expireAfter)) {
-			return false;
-		}
-		return true;
+		return ObjectUtils.nullSafeEquals(expireAfter, other.expireAfter);
 	}
 
 }

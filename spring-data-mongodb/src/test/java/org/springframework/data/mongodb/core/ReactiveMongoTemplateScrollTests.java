@@ -15,8 +15,8 @@
  */
 package org.springframework.data.mongodb.core;
 
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.test.util.Assertions.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.test.util.Assertions.assertThat;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -96,13 +96,13 @@ class ReactiveMongoTemplateScrollTests {
 			Function<Person, T> assertionConverter) {
 
 		Person john20 = new Person("John", 20);
-		Person john40_1 = new Person("John", 40);
-		Person john40_2 = new Person("John", 40);
-		Person jane_20 = new Person("Jane", 20);
-		Person jane_40 = new Person("Jane", 40);
-		Person jane_42 = new Person("Jane", 42);
+		Person john401 = new Person("John", 40);
+		Person john402 = new Person("John", 40);
+		Person jane20 = new Person("Jane", 20);
+		Person jane40 = new Person("Jane", 40);
+		Person jane42 = new Person("Jane", 42);
 
-		template.insertAll(Arrays.asList(john20, john40_1, john40_2, jane_20, jane_40, jane_42)) //
+		template.insertAll(Arrays.asList(john20, john401, john402, jane20, jane40, jane42)) //
 				.as(StepVerifier::create) //
 				.expectNextCount(6) //
 				.verifyComplete();
@@ -115,7 +115,7 @@ class ReactiveMongoTemplateScrollTests {
 		assertThat(window.hasNext()).isTrue();
 		assertThat(window.isLast()).isFalse();
 		assertThat(window).hasSize(2);
-		assertThat(window).containsOnly(assertionConverter.apply(jane_20), assertionConverter.apply(jane_40));
+		assertThat(window).containsOnly(assertionConverter.apply(jane20), assertionConverter.apply(jane40));
 
 		window = template.scroll(q.limit(3).with(window.positionAt(window.size() - 1)), resultType, "person")
 				.block(Duration.ofSeconds(10));
@@ -123,8 +123,8 @@ class ReactiveMongoTemplateScrollTests {
 		assertThat(window.hasNext()).isTrue();
 		assertThat(window.isLast()).isFalse();
 		assertThat(window).hasSize(3);
-		assertThat(window).contains(assertionConverter.apply(jane_42), assertionConverter.apply(john20));
-		assertThat(window).containsAnyOf(assertionConverter.apply(john40_1), assertionConverter.apply(john40_2));
+		assertThat(window).contains(assertionConverter.apply(jane42), assertionConverter.apply(john20));
+		assertThat(window).containsAnyOf(assertionConverter.apply(john401), assertionConverter.apply(john402));
 
 		window = template.scroll(q.limit(1).with(window.positionAt(window.size() - 1)), resultType, "person")
 				.block(Duration.ofSeconds(10));
@@ -132,7 +132,7 @@ class ReactiveMongoTemplateScrollTests {
 		assertThat(window.hasNext()).isFalse();
 		assertThat(window.isLast()).isTrue();
 		assertThat(window).hasSize(1);
-		assertThat(window).containsAnyOf(assertionConverter.apply(john40_1), assertionConverter.apply(john40_2));
+		assertThat(window).containsAnyOf(assertionConverter.apply(john401), assertionConverter.apply(john402));
 	}
 
 	@ParameterizedTest // GH-4308
@@ -174,13 +174,8 @@ class ReactiveMongoTemplateScrollTests {
 
 	static Stream<Arguments> renamedFieldProjectTargets() {
 		return Stream.of(Arguments.of(WithRenamedField.class, Function.identity()),
-				Arguments.of(Document.class, new Function<WithRenamedField, Document>() {
-					@Override
-					public Document apply(WithRenamedField withRenamedField) {
-						return new Document("_id", withRenamedField.getId()).append("_val", withRenamedField.getValue())
-								.append("_class", WithRenamedField.class.getName());
-					}
-				}));
+				Arguments.of(Document.class, withRenamedField -> new Document("_id", withRenamedField.getId()).append("_val", withRenamedField.getValue())
+						.append("_class", WithRenamedField.class.getName())));
 	}
 
 	private static <T> Arguments args(ScrollPosition scrollPosition, Class<T> resultType,

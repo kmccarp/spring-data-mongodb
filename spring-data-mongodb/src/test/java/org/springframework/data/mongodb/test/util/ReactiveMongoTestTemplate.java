@@ -63,14 +63,11 @@ public class ReactiveMongoTestTemplate extends ReactiveMongoTemplate {
 
 	public ReactiveMongoTestTemplate(Consumer<MongoTestTemplateConfiguration> cfg) {
 
-		this(new Supplier<MongoTestTemplateConfiguration>() {
-			@Override
-			public MongoTestTemplateConfiguration get() {
+		this(() -> {
 
-				MongoTestTemplateConfiguration config = new MongoTestTemplateConfiguration();
-				cfg.accept(config);
-				return config;
-			}
+			MongoTestTemplateConfiguration config = new MongoTestTemplateConfiguration();
+			cfg.accept(config);
+			return config;
 		});
 	}
 

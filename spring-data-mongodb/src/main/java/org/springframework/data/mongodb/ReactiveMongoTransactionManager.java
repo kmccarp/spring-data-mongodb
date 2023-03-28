@@ -66,6 +66,8 @@ import com.mongodb.reactivestreams.client.ClientSession;
  */
 public class ReactiveMongoTransactionManager extends AbstractReactiveTransactionManager implements InitializingBean {
 
+	private static final long serialVersionUID = 1;
+
 	private @Nullable ReactiveMongoDatabaseFactory databaseFactory;
 	private @Nullable TransactionOptions options;
 
@@ -196,10 +198,8 @@ public class ReactiveMongoTransactionManager extends AbstractReactiveTransaction
 						debugString(mongoTransactionObject.getSession())));
 			}
 
-			return doCommit(synchronizationManager, mongoTransactionObject).onErrorMap(ex -> {
-				return new TransactionSystemException(String.format("Could not commit Mongo transaction for session %s.",
-						debugString(mongoTransactionObject.getSession())), ex);
-			});
+			return doCommit(synchronizationManager, mongoTransactionObject).onErrorMap(ex -> new TransactionSystemException(String.format("Could not commit Mongo transaction for session %s.",
+						debugString(mongoTransactionObject.getSession())), ex));
 		});
 	}
 
@@ -232,11 +232,9 @@ public class ReactiveMongoTransactionManager extends AbstractReactiveTransaction
 						debugString(mongoTransactionObject.getSession())));
 			}
 
-			return mongoTransactionObject.abortTransaction().onErrorResume(MongoException.class, ex -> {
-				return Mono
+			return mongoTransactionObject.abortTransaction().onErrorResume(MongoException.class, ex -> Mono
 						.error(new TransactionSystemException(String.format("Could not abort Mongo transaction for session %s.",
-								debugString(mongoTransactionObject.getSession())), ex));
-			});
+								debugString(mongoTransactionObject.getSession())), ex)));
 		});
 	}
 

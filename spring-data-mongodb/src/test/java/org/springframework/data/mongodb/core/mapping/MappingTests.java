@@ -15,10 +15,11 @@
  */
 package org.springframework.data.mongodb.core.mapping;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
-import static org.springframework.data.mongodb.core.query.Update.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+import static org.springframework.data.mongodb.core.query.Update.update;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,13 +33,11 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.MongoCollectionUtils;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
@@ -50,7 +49,6 @@ import org.springframework.data.mongodb.test.util.MongoTemplateExtension;
 import org.springframework.data.mongodb.test.util.MongoTestTemplate;
 import org.springframework.data.mongodb.test.util.Template;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 
@@ -130,7 +128,7 @@ public class MappingTests {
 	@Test
 	public void testPersonMapProperty() {
 		PersonMapProperty p = new PersonMapProperty(1234567, "Map", "PropertyPath");
-		Map<String, AccountPojo> accounts = new HashMap<String, AccountPojo>();
+		Map<String, AccountPojo> accounts = new HashMap<>();
 
 		AccountPojo checking = new AccountPojo("checking", 1000.0f);
 		AccountPojo savings = new AccountPojo("savings", 10000.0f);
@@ -163,7 +161,7 @@ public class MappingTests {
 		acct.setBalance(1000.00f);
 		template.insert(acct, "account");
 
-		List<Account> accounts = new ArrayList<Account>();
+		List<Account> accounts = new ArrayList<>();
 		accounts.add(acct);
 
 		Person p = new Person(123456789, "John", "Doe", 37, addr);
@@ -208,7 +206,7 @@ public class MappingTests {
 
 	@Test
 	public void testCustomCollectionInList() {
-		List<BasePerson> persons = new ArrayList<BasePerson>();
+		List<BasePerson> persons = new ArrayList<>();
 		persons.add(new PersonCustomCollection1(55555, "Person", "One"));
 		persons.add(new PersonCustomCollection2(66666, "Person", "Two"));
 		template.insertAll(persons);
@@ -242,41 +240,36 @@ public class MappingTests {
 		CustomCollectionWithIndex ccwi = new CustomCollectionWithIndex("test");
 		template.insert(ccwi);
 
-		assertThat(template.execute("foobar", new CollectionCallback<Boolean>() {
-			public Boolean doInCollection(MongoCollection<Document> collection) throws MongoException, DataAccessException {
+		assertThat(template.execute("foobar", collection -> {
 
-				List<Document> indexes = new ArrayList<Document>();
-				collection.listIndexes(Document.class).into(indexes);
+			List<Document> indexes = new ArrayList<>();
+			collection.listIndexes(Document.class).into(indexes);
 
-				for (Document document : indexes) {
-					if (document.get("name") != null && document.get("name") instanceof String
-							&& ((String) document.get("name")).startsWith("name")) {
-						return true;
-					}
+			for (Document document : indexes) {
+				if (document.get("name") != null && document.get("name") instanceof String
+						&& ((String) document.get("name")).startsWith("name")) {
+					return true;
 				}
-				return false;
 			}
+			return false;
 		})).isTrue();
 
 		DetectedCollectionWithIndex dcwi = new DetectedCollectionWithIndex("test");
 		template.insert(dcwi);
 
 		assertThat(template.execute(MongoCollectionUtils.getPreferredCollectionName(DetectedCollectionWithIndex.class),
-				new CollectionCallback<Boolean>() {
-					public Boolean doInCollection(MongoCollection<Document> collection)
-							throws MongoException, DataAccessException {
+				collection -> {
 
-						List<Document> indexes = new ArrayList<Document>();
-						collection.listIndexes(Document.class).into(indexes);
+					List<Document> indexes = new ArrayList<>();
+					collection.listIndexes(Document.class).into(indexes);
 
-						for (Document document : indexes) {
-							if (document.get("name") != null && document.get("name") instanceof String
-									&& ((String) document.get("name")).startsWith("name")) {
-								return true;
-							}
+					for (Document document : indexes) {
+						if (document.get("name") != null && document.get("name") instanceof String
+								&& ((String) document.get("name")).startsWith("name")) {
+							return true;
 						}
-						return false;
 					}
+					return false;
 				})).isTrue();
 	}
 
@@ -296,8 +289,8 @@ public class MappingTests {
 
 	@Test
 	public void testMultiDimensionalCollectionProperties() {
-		List<List<String>> grid = new ArrayList<List<String>>();
-		ArrayList<String> inner = new ArrayList<String>();
+		List<List<String>> grid = new ArrayList<>();
+		ArrayList<String> inner = new ArrayList<>();
 		inner.add("1");
 		inner.add("2");
 		inner.add("3");
@@ -578,7 +571,7 @@ public class MappingTests {
 
 	static class IterableItem extends Item implements Iterable<ItemData> {
 
-		List<ItemData> data = new ArrayList<MappingTests.ItemData>();
+		List<ItemData> data = new ArrayList<>();
 
 		@Override
 		public Iterator<ItemData> iterator() {

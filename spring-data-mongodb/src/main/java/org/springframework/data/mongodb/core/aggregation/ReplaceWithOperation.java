@@ -49,7 +49,7 @@ public class ReplaceWithOperation extends ReplaceRootOperation {
 	 * @return new instance of {@link ReplaceWithOperation}.
 	 */
 	public static ReplaceWithOperation replaceWithValue(Object value) {
-		return new ReplaceWithOperation((ctx) -> value);
+		return new ReplaceWithOperation(ctx -> value);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class ReplaceWithOperation extends ReplaceRootOperation {
 	public static ReplaceWithOperation replaceWithValueOf(Object value) {
 
 		Assert.notNull(value, "Value must not be null");
-		return new ReplaceWithOperation((ctx) -> {
+		return new ReplaceWithOperation(ctx -> {
 
 			Object target = value instanceof String ? Fields.field((String) value) : value;
 			return computeValue(target, ctx);

@@ -31,7 +31,7 @@ import org.springframework.data.util.StreamUtils;
  * @author Oliver Gierke
  * @since 2.1
  */
-public class MappedDocument {
+public final class MappedDocument {
 
 	private static final String ID_FIELD = "_id";
 	private static final Document ID_ONLY_PROJECTION = new Document(ID_FIELD, 1);

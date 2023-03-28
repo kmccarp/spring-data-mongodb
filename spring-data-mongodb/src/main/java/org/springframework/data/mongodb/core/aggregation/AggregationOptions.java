@@ -655,7 +655,7 @@ public class AggregationOptions implements ReadConcernAware, ReadPreferenceAware
 		/**
 		 * Read the aggregation result from the cursor.
 		 */
-		READ;
+		READ
 	}
 
 	/**

@@ -167,7 +167,7 @@ public class ObjectOperators {
 	 *      "https://docs.mongodb.com/manual/reference/operator/aggregation/mergeObjects/">https://docs.mongodb.com/manual/reference/operator/aggregation/mergeObjects/</a>
 	 * @since 2.1
 	 */
-	public static class MergeObjects extends AbstractAggregationExpression {
+	public static final class MergeObjects extends AbstractAggregationExpression {
 
 		private MergeObjects(Object value) {
 			super(value);
@@ -247,7 +247,7 @@ public class ObjectOperators {
 
 			if (value instanceof Collection) {
 
-				Collection<Object> collection = ((Collection<Object>) value);
+				Collection<Object> collection = (Collection<Object>) value;
 				if (collection.size() == 1) {
 					return collection.iterator().next();
 				}
@@ -271,7 +271,7 @@ public class ObjectOperators {
 	 *      "https://docs.mongodb.com/manual/reference/operator/aggregation/objectToArray/">https://docs.mongodb.com/manual/reference/operator/aggregation/objectToArray/</a>
 	 * @since 2.1
 	 */
-	public static class ObjectToArray extends AbstractAggregationExpression {
+	public static final class ObjectToArray extends AbstractAggregationExpression {
 
 		private ObjectToArray(Object value) {
 			super(value);

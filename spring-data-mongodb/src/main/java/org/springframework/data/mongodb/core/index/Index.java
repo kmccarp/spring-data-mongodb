@@ -37,11 +37,11 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("deprecation")
 public class Index implements IndexDefinition {
 
-	private final Map<String, Direction> fieldSpec = new LinkedHashMap<String, Direction>();
+	private final Map<String, Direction> fieldSpec = new LinkedHashMap<>();
 	private @Nullable String name;
-	private boolean unique = false;
-	private boolean sparse = false;
-	private boolean background = false;
+	private boolean unique;
+	private boolean sparse;
+	private boolean background;
 	private long expire = -1;
 	private Optional<IndexFilter> filter = Optional.empty();
 	private Optional<Collation> collation = Optional.empty();
