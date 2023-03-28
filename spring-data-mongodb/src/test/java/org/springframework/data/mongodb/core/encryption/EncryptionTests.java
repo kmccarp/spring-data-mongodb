@@ -405,9 +405,7 @@ public class EncryptionTests {
 
 	<T> void assertSaved(T source, Function<T, ?> idProvider, Consumer<Document> dbValue) {
 
-		Document savedDocument = template.execute(Person.class, collection -> {
-			return collection.find(new Document("_id", idProvider.apply(source))).first();
-		});
+		Document savedDocument = template.execute(Person.class, collection -> collection.find(new Document("_id", idProvider.apply(source))).first());
 		dbValue.accept(savedDocument);
 	}
 
@@ -448,7 +446,7 @@ public class EncryptionTests {
 					new DataKeyOptions().keyAltNames(Collections.singletonList("mySuperSecretKey"))));
 
 			return new MongoEncryptionConverter(mongoClientEncryption,
-					EncryptionKeyResolver.annotated((ctx) -> EncryptionKey.keyId(dataKey.get())));
+					EncryptionKeyResolver.annotated(ctx -> EncryptionKey.keyId(dataKey.get())));
 		}
 
 		@Bean
@@ -472,22 +470,17 @@ public class EncryptionTests {
 
 			final byte[] localMasterKey = new byte[96];
 			new SecureRandom().nextBytes(localMasterKey);
-			Map<String, Map<String, Object>> kmsProviders = new HashMap<>() {
+			Map<String, Map<String, Object>> kmsProviders = new HashMap<>();
+			kmsProviders.put("local", new HashMap<>() {
 				{
-					put("local", new HashMap<>() {
-						{
-							put("key", localMasterKey);
-						}
-					});
+					kmsProviders.put("key", localMasterKey);
 				}
-			};
-
+			});
 			// Create the ClientEncryption instance
-			ClientEncryptionSettings clientEncryptionSettings = ClientEncryptionSettings.builder()
+			return ClientEncryptionSettings.builder()
 					.keyVaultMongoClientSettings(
 							MongoClientSettings.builder().applyConnectionString(new ConnectionString("mongodb://localhost")).build())
 					.keyVaultNamespace(keyVaultNamespace.getFullName()).kmsProviders(kmsProviders).build();
-			return clientEncryptionSettings;
 		}
 
 	}

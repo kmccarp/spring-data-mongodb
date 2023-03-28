@@ -36,7 +36,7 @@ import org.springframework.data.mongodb.core.Person;
  */
 public class SpelExpressionTransformerUnitTests {
 
-	private SpelExpressionTransformer transformer = new SpelExpressionTransformer();
+	private final SpelExpressionTransformer transformer = new SpelExpressionTransformer();
 
 	private Data data;
 
@@ -175,8 +175,8 @@ public class SpelExpressionTransformerUnitTests {
 	@Test // DATAMONGO-774
 	void shouldRenderNestedParameterExpressionResultsInNestedExpressions() {
 
-		Document target = ((Document) transform(
-				"((1 + [0].primitiveLongValue) + [0].primitiveDoubleValue) * [0].doubleValue.longValue()", data));
+		Document target = (Document) transform(
+				"((1 + [0].primitiveLongValue) + [0].primitiveDoubleValue) * [0].doubleValue.longValue()", data);
 
 		assertThat(
 				((Document) transform("((1 + [0].primitiveLongValue) + [0].primitiveDoubleValue) * [0].doubleValue.longValue()",

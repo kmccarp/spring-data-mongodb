@@ -33,7 +33,7 @@ import com.mongodb.client.MongoCollection;
  * @author Mark Paluch
  * @since 4.1
  */
-class CollectionPreparerSupport implements ReadConcernAware, ReadPreferenceAware {
+final class CollectionPreparerSupport implements ReadConcernAware, ReadPreferenceAware {
 
 	private final List<Object> sources;
 
@@ -119,7 +119,7 @@ class CollectionPreparerSupport implements ReadConcernAware, ReadPreferenceAware
 		return null;
 	}
 
-	static class CollectionPreparerDelegate extends CollectionPreparerSupport
+	static final class CollectionPreparerDelegate extends CollectionPreparerSupport
 			implements CollectionPreparer<MongoCollection<Document>> {
 
 		private CollectionPreparerDelegate(List<Object> sources) {
@@ -147,7 +147,7 @@ class CollectionPreparerSupport implements ReadConcernAware, ReadPreferenceAware
 
 	}
 
-	static class ReactiveCollectionPreparerDelegate extends CollectionPreparerSupport
+	static final class ReactiveCollectionPreparerDelegate extends CollectionPreparerSupport
 			implements CollectionPreparer<com.mongodb.reactivestreams.client.MongoCollection<Document>> {
 
 		private ReactiveCollectionPreparerDelegate(List<Object> sources) {

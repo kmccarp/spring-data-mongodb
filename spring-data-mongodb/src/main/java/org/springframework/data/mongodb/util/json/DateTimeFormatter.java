@@ -15,7 +15,7 @@
  */
 package org.springframework.data.mongodb.util.json;
 
-import static java.time.format.DateTimeFormatter.*;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +24,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQuery;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -38,7 +37,7 @@ import java.util.TimeZone;
  * @author Ross Lawley
  * @since 2.2
  */
-class DateTimeFormatter {
+final class DateTimeFormatter {
 
 	private static final FormatterImpl FORMATTER_IMPL;
 
@@ -151,12 +150,7 @@ class DateTimeFormatter {
 		@Override
 		public long parse(final String dateTimeString) {
 			try {
-				return ISO_OFFSET_DATE_TIME.parse(dateTimeString, new TemporalQuery<Instant>() {
-					@Override
-					public Instant queryFrom(final TemporalAccessor temporal) {
-						return Instant.from(temporal);
-					}
-				}).toEpochMilli();
+				return ISO_OFFSET_DATE_TIME.parse(dateTimeString, Instant::from).toEpochMilli();
 			} catch (DateTimeParseException e) {
 				throw new IllegalArgumentException(e.getMessage());
 			}

@@ -447,7 +447,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class ArrayElemAt extends AbstractAggregationExpression {
+	public static final class ArrayElemAt extends AbstractAggregationExpression {
 
 		private ArrayElemAt(List<?> value) {
 			super(value);
@@ -535,7 +535,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class ConcatArrays extends AbstractAggregationExpression {
+	public static final class ConcatArrays extends AbstractAggregationExpression {
 
 		private ConcatArrays(List<?> value) {
 			super(value);
@@ -615,7 +615,7 @@ public class ArrayOperators {
 	 * @author Christoph Strobl
 	 * @since 1.10
 	 */
-	public static class Filter implements AggregationExpression {
+	public static final class Filter implements AggregationExpression {
 
 		private @Nullable Object input;
 		private @Nullable ExposedField as;
@@ -836,7 +836,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class IsArray extends AbstractAggregationExpression {
+	public static final class IsArray extends AbstractAggregationExpression {
 
 		private IsArray(Object value) {
 			super(value);
@@ -877,7 +877,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Size extends AbstractAggregationExpression {
+	public static final class Size extends AbstractAggregationExpression {
 
 		private Size(Object value) {
 			super(value);
@@ -931,7 +931,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Slice extends AbstractAggregationExpression {
+	public static final class Slice extends AbstractAggregationExpression {
 
 		private Slice(List<?> value) {
 			super(value);
@@ -997,13 +997,7 @@ public class ArrayOperators {
 		 */
 		public SliceElementsBuilder offset(final int position) {
 
-			return new SliceElementsBuilder() {
-
-				@Override
-				public Slice itemCount(int nrElements) {
-					return new Slice(append(position)).itemCount(nrElements);
-				}
-			};
+			return new Slice(append(position))::itemCount;
 		}
 
 		/**
@@ -1026,7 +1020,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class IndexOfArray extends AbstractAggregationExpression {
+	public static final class IndexOfArray extends AbstractAggregationExpression {
 
 		private IndexOfArray(List<Object> value) {
 			super(value);
@@ -1087,7 +1081,7 @@ public class ArrayOperators {
 		/**
 		 * @author Christoph Strobl
 		 */
-		public static class IndexOfArrayBuilder {
+		public static final class IndexOfArrayBuilder {
 
 			private final Object targetArray;
 
@@ -1114,7 +1108,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class RangeOperator extends AbstractAggregationExpression {
+	public static final class RangeOperator extends AbstractAggregationExpression {
 
 		private RangeOperator(List<Object> values) {
 			super(values);
@@ -1159,7 +1153,7 @@ public class ArrayOperators {
 			return new RangeOperator(append(stepSize));
 		}
 
-		public static class RangeOperatorBuilder {
+		public static final class RangeOperatorBuilder {
 
 			private final Object startPoint;
 
@@ -1204,7 +1198,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class ReverseArray extends AbstractAggregationExpression {
+	public static final class ReverseArray extends AbstractAggregationExpression {
 
 		private ReverseArray(Object value) {
 			super(value);
@@ -1252,7 +1246,7 @@ public class ArrayOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Reduce implements AggregationExpression {
+	public static final class Reduce implements AggregationExpression {
 
 		private final Object input;
 		private final Object initialValue;
@@ -1442,13 +1436,7 @@ public class ArrayOperators {
 			 */
 			public static AsBuilder property(final String name) {
 
-				return new AsBuilder() {
-
-					@Override
-					public PropertyExpression definedAs(AggregationExpression expression) {
-						return new PropertyExpression(name, expression);
-					}
-				};
+				return expression -> new PropertyExpression(name, expression);
 			}
 
 			@Override
@@ -1649,13 +1637,13 @@ public class ArrayOperators {
 			return new Zip(append("defaults", Arrays.asList(array)));
 		}
 
-		public static class ZipBuilder {
+		public static final class ZipBuilder {
 
 			private final List<Object> sourceArrays;
 
 			private ZipBuilder(Object sourceArray) {
 
-				this.sourceArrays = new ArrayList<Object>();
+				this.sourceArrays = new ArrayList<>();
 				this.sourceArrays.add(sourceArray);
 			}
 
@@ -1693,7 +1681,7 @@ public class ArrayOperators {
 	 * "https://docs.mongodb.com/manual/reference/operator/aggregation/in/">https://docs.mongodb.com/manual/reference/operator/aggregation/in/</a>
 	 * @since 2.2
 	 */
-	public static class In extends AbstractAggregationExpression {
+	public static final class In extends AbstractAggregationExpression {
 
 		private In(List<Object> values) {
 			super(values);
@@ -1782,7 +1770,7 @@ public class ArrayOperators {
 	 * "https://docs.mongodb.com/manual/reference/operator/aggregation/arrayToObject/">https://docs.mongodb.com/manual/reference/operator/aggregation/arrayToObject/</a>
 	 * @since 2.1
 	 */
-	public static class ArrayToObject extends AbstractAggregationExpression {
+	public static final class ArrayToObject extends AbstractAggregationExpression {
 
 		private ArrayToObject(Object value) {
 			super(value);
@@ -1832,7 +1820,7 @@ public class ArrayOperators {
 	 * @author Christoph Strobl
 	 * @since 3.4
 	 */
-	public static class First extends AbstractAggregationExpression {
+	public static final class First extends AbstractAggregationExpression {
 
 		private First(Object value) {
 			super(value);
@@ -1886,7 +1874,7 @@ public class ArrayOperators {
 	 * @author Christoph Strobl
 	 * @since 3.4
 	 */
-	public static class Last extends AbstractAggregationExpression {
+	public static final class Last extends AbstractAggregationExpression {
 
 		private Last(Object value) {
 			super(value);
@@ -1938,7 +1926,7 @@ public class ArrayOperators {
 	 * @author Christoph Strobl
 	 * @since 4.0
 	 */
-	public static class SortArray extends AbstractAggregationExpression {
+	public static final class SortArray extends AbstractAggregationExpression {
 
 		private SortArray(Object value) {
 			super(value);

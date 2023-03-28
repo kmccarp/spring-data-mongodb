@@ -51,7 +51,7 @@ public class ProjectionsBenchmark extends AbstractMicrobenchmark {
 	private FindWithQuery<OpenProjection> asOpenProjection;
 
 	private TerminatingFind<Person> asPersonWithFieldsRestriction;
-	private Document fields = new Document("firstname", 1);
+	private final Document fields = new Document("firstname", 1);
 
 	@Setup
 	public void setUp() {

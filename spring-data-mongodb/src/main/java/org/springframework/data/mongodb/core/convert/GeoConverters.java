@@ -63,7 +63,7 @@ import com.mongodb.Function;
 @SuppressWarnings("ConstantConditions")
 abstract class GeoConverters {
 
-	private final static Map<String, Function<Document, GeoJson<?>>> converters;
+	private static final Map<String, Function<Document, GeoJson<?>>> converters;
 
 	static {
 
@@ -244,7 +244,7 @@ abstract class GeoConverters {
 	 * @since 1.5
 	 */
 	@ReadingConverter
-	static enum DocumentToCircleConverter implements Converter<Document, Circle> {
+	enum DocumentToCircleConverter implements Converter<Document, Circle> {
 
 		INSTANCE;
 
@@ -276,12 +276,12 @@ abstract class GeoConverters {
 	}
 
 	/**
-	 * Converts a {@link Sphere} into a {@link Document}.
-	 *
-	 * @author Thomas Darimont
-	 * @since 1.5
-	 */
-	static enum SphereToDocumentConverter implements Converter<Sphere, Document> {
+		* Converts a {@link Sphere} into a {@link Document}.
+		*
+		* @author Thomas Darimont
+		* @since 1.5
+		*/
+	enum SphereToDocumentConverter implements Converter<Sphere, Document> {
 
 		INSTANCE;
 
@@ -588,10 +588,10 @@ abstract class GeoConverters {
 	}
 
 	/**
-	 * @author Christoph Strobl
-	 * @since 1.7
-	 */
-	static enum DocumentToGeoJsonMultiPolygonConverter implements Converter<Document, GeoJsonMultiPolygon> {
+		* @author Christoph Strobl
+		* @since 1.7
+		*/
+	enum DocumentToGeoJsonMultiPolygonConverter implements Converter<Document, GeoJsonMultiPolygon> {
 
 		INSTANCE;
 

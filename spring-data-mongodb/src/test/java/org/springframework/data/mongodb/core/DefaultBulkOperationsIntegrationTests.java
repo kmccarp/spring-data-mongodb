@@ -294,7 +294,7 @@ public class DefaultBulkOperationsIntegrationTests {
 
 		insertSomeDocuments();
 
-		List<Pair<Query, Update>> updates = new ArrayList<Pair<Query, Update>>();
+		List<Pair<Query, Update>> updates = new ArrayList<>();
 		updates.add(Pair.of(where("value", "value1"), set("value", "value3")));
 		updates.add(Pair.of(where("value", "value2"), set("value", "value4")));
 

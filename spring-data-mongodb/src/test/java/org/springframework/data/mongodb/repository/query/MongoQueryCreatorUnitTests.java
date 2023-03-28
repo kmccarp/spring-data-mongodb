@@ -614,7 +614,7 @@ class MongoQueryCreatorUnitTests {
 		ConvertingParameterAccessor accessor = getAccessor(converter,
 				new GeoJsonLineString(new Point(-74.044502D, 40.689247D), new Point(-73.997330D, 40.730824D)));
 
-		assertThatIllegalArgumentException().isThrownBy(() -> new MongoQueryCreator(tree, accessor, context).createQuery())
+		assertThatIllegalArgumentException().isThrownBy(new MongoQueryCreator(tree, accessor, context)::createQuery)
 				.withMessageContaining("Expected parameter type of " + Point.class);
 	}
 

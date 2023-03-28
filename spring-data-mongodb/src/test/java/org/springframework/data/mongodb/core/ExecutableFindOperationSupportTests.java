@@ -392,7 +392,7 @@ class ExecutableFindOperationSupportTests implements StateFunctions {
 
 	@Test // DATAMONGO-1734
 	void returnsTargetObjectDirectlyIfProjectionInterfaceIsImplemented() {
-		assertThat(template.query(Person.class).as(Contact.class).all()).allMatch(it -> it instanceof Person);
+		assertThat(template.query(Person.class).as(Contact.class).all()).allMatch(Person.class::isInstance);
 	}
 
 	@Test // DATAMONGO-1761

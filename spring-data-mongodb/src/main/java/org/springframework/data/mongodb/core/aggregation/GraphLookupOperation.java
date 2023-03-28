@@ -41,9 +41,9 @@ import org.springframework.util.ClassUtils;
  * @author Christoph Strobl
  * @since 1.10
  */
-public class GraphLookupOperation implements InheritsFieldsAggregationOperation {
+public final class GraphLookupOperation implements InheritsFieldsAggregationOperation {
 
-	private static final Set<Class<?>> ALLOWED_START_TYPES = new HashSet<Class<?>>(
+	private static final Set<Class<?>> ALLOWED_START_TYPES = new HashSet<>(
 			Arrays.<Class<?>> asList(AggregationExpression.class, String.class, Field.class, Document.class));
 
 	private final String from;
@@ -84,7 +84,7 @@ public class GraphLookupOperation implements InheritsFieldsAggregationOperation 
 
 		graphLookup.put("from", from);
 
-		List<Object> mappedStartWith = new ArrayList<Object>(startWith.size());
+		List<Object> mappedStartWith = new ArrayList<>(startWith.size());
 
 		for (Object startWithElement : startWith) {
 
@@ -237,7 +237,7 @@ public class GraphLookupOperation implements InheritsFieldsAggregationOperation 
 			Assert.notNull(fieldReferences, "FieldReferences must not be null");
 			Assert.noNullElements(fieldReferences, "FieldReferences must not contain null elements");
 
-			List<Object> fields = new ArrayList<Object>(fieldReferences.length);
+			List<Object> fields = new ArrayList<>(fieldReferences.length);
 
 			for (String fieldReference : fieldReferences) {
 				fields.add(Fields.field(fieldReference));
@@ -269,7 +269,7 @@ public class GraphLookupOperation implements InheritsFieldsAggregationOperation 
 
 		private List<Object> verifyAndPotentiallyTransformStartsWithTypes(Object... expressions) {
 
-			List<Object> expressionsToUse = new ArrayList<Object>(expressions.length);
+			List<Object> expressionsToUse = new ArrayList<>(expressions.length);
 
 			for (Object expression : expressions) {
 
@@ -333,7 +333,7 @@ public class GraphLookupOperation implements InheritsFieldsAggregationOperation 
 				String connectTo) {
 
 			this.from = from;
-			this.startWith = new ArrayList<Object>(startWith);
+			this.startWith = new ArrayList<>(startWith);
 			this.connectFrom = Fields.field(connectFrom);
 			this.connectTo = Fields.field(connectTo);
 		}

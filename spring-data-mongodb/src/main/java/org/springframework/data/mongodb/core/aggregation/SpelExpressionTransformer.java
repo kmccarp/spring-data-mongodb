@@ -67,7 +67,7 @@ class SpelExpressionTransformer implements AggregationExpressionTransformer {
 	 */
 	SpelExpressionTransformer() {
 
-		List<ExpressionNodeConversion<? extends ExpressionNode>> conversions = new ArrayList<ExpressionNodeConversion<? extends ExpressionNode>>();
+		List<ExpressionNodeConversion<? extends ExpressionNode>> conversions = new ArrayList<>();
 		conversions.add(new OperatorNodeConversion(this));
 		conversions.add(new LiteralNodeConversion(this));
 		conversions.add(new IndexerNodeConversion(this));
@@ -135,7 +135,7 @@ class SpelExpressionTransformer implements AggregationExpressionTransformer {
 	 * @author Thomas Darimont
 	 * @author Oliver Gierke
 	 */
-	private static abstract class ExpressionNodeConversion<T extends ExpressionNode>
+	private abstract static class ExpressionNodeConversion<T extends ExpressionNode>
 			implements AggregationExpressionTransformer {
 
 		private final AggregationExpressionTransformer transformer;
@@ -198,7 +198,7 @@ class SpelExpressionTransformer implements AggregationExpressionTransformer {
 			Assert.notNull(node, "ExpressionNode must not be null");
 			Assert.notNull(context, "AggregationExpressionTransformationContext must not be null");
 
-			return transform(new AggregationExpressionTransformationContext<ExpressionNode>(node, parent, operation,
+			return transform(new AggregationExpressionTransformationContext<>(node, parent, operation,
 					context.getAggregationContext()));
 		}
 
@@ -453,7 +453,7 @@ class SpelExpressionTransformer implements AggregationExpressionTransformer {
 			}
 			else {
 
-				List<Object> argList = new ArrayList<Object>();
+				List<Object> argList = new ArrayList<>();
 
 				for (ExpressionNode childNode : node) {
 					argList.add(transform(childNode, context));
@@ -516,7 +516,7 @@ class SpelExpressionTransformer implements AggregationExpressionTransformer {
 		protected Object convert(AggregationExpressionTransformationContext<NotOperatorNode> context) {
 
 			NotOperatorNode node = context.getCurrentNode();
-			List<Object> args = new ArrayList<Object>();
+			List<Object> args = new ArrayList<>();
 
 			for (ExpressionNode childNode : node) {
 				args.add(transform(childNode, context));

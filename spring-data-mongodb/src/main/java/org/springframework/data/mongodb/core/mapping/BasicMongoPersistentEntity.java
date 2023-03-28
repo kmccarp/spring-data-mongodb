@@ -209,11 +209,11 @@ public class BasicMongoPersistentEntity<T> extends BasicPersistentEntity<T, Mong
 	}
 
 	/**
-	 * {@link Comparator} implementation inspecting the {@link MongoPersistentProperty}'s order.
-	 *
-	 * @author Oliver Gierke
-	 */
-	static enum MongoPersistentPropertyComparator implements Comparator<MongoPersistentProperty> {
+		* {@link Comparator} implementation inspecting the {@link MongoPersistentProperty}'s order.
+		*
+		* @author Oliver Gierke
+		*/
+	enum MongoPersistentPropertyComparator implements Comparator<MongoPersistentProperty> {
 
 		INSTANCE;
 
@@ -316,7 +316,7 @@ public class BasicMongoPersistentEntity<T> extends BasicPersistentEntity<T, Mong
 	private static class AssertFieldNameUniquenessHandler
 			implements PropertyHandler<MongoPersistentProperty>, AssociationHandler<MongoPersistentProperty> {
 
-		private final Map<String, MongoPersistentProperty> properties = new HashMap<String, MongoPersistentProperty>();
+		private final Map<String, MongoPersistentProperty> properties = new HashMap<>();
 
 		public void doWithPersistentProperty(MongoPersistentProperty persistentProperty) {
 			assertUniqueness(persistentProperty);

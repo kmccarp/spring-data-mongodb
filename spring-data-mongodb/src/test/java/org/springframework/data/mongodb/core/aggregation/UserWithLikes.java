@@ -33,12 +33,12 @@ public class UserWithLikes {
 
 	String id;
 	Date joined;
-	Set<String> likes = new HashSet<String>();
+	Set<String> likes = new HashSet<>();
 
 	public UserWithLikes(String id, Date joined, String... likes) {
 
 		this.id = id;
 		this.joined = joined;
-		this.likes = new HashSet<String>(Arrays.asList(likes));
+		this.likes = new HashSet<>(Arrays.asList(likes));
 	}
 }

@@ -259,7 +259,7 @@ class ScrollUtils {
 	static <T> List<T> getLast(int count, List<T> list) {
 
 		if (count > 0 && list.size() > count) {
-			return list.subList(list.size() - (count), list.size());
+			return list.subList(list.size() - count, list.size());
 		}
 
 		return list;

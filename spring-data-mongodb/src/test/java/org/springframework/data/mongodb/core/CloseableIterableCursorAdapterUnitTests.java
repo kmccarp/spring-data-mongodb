@@ -56,20 +56,20 @@ class CloseableIterableCursorAdapterUnitTests {
 	void propagatesOriginalExceptionFromAdapterDotNext() {
 
 		doThrow(IllegalArgumentException.class).when(cursor).next();
-		assertThatIllegalArgumentException().isThrownBy(() -> adapter.next());
+		assertThatIllegalArgumentException().isThrownBy(adapter::next);
 	}
 
 	@Test // DATAMONGO-1276
 	void propagatesOriginalExceptionFromAdapterDotHasNext() {
 
 		doThrow(IllegalArgumentException.class).when(cursor).hasNext();
-		assertThatIllegalArgumentException().isThrownBy(() -> adapter.hasNext());
+		assertThatIllegalArgumentException().isThrownBy(adapter::hasNext);
 	}
 
 	@Test // DATAMONGO-1276
 	void propagatesOriginalExceptionFromAdapterDotClose() {
 
 		doThrow(IllegalArgumentException.class).when(cursor).close();
-		assertThatIllegalArgumentException().isThrownBy(() -> adapter.close());
+		assertThatIllegalArgumentException().isThrownBy(adapter::close);
 	}
 }

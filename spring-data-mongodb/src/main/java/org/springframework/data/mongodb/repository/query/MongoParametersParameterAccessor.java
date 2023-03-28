@@ -116,7 +116,7 @@ public class MongoParametersParameterAccessor extends ParametersParameterAccesso
 		}
 
 		if (fullText instanceof TextCriteria) {
-			return ((TextCriteria) fullText);
+			return (TextCriteria) fullText;
 		}
 
 		throw new IllegalArgumentException(

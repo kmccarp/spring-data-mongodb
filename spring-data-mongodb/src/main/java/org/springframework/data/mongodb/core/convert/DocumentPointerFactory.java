@@ -74,7 +74,7 @@ class DocumentPointerFactory {
 			MongoPersistentProperty property, Object value, Class<?> typeHint) {
 
 		if (value instanceof LazyLoadingProxy) {
-			return () -> ((LazyLoadingProxy) value).getSource();
+			return ((LazyLoadingProxy) value)::getSource;
 		}
 
 		if (conversionService.canConvert(typeHint, DocumentPointer.class)) {
@@ -144,7 +144,7 @@ class DocumentPointerFactory {
 	 * the provided {@link PersistentPropertyAccessor} to the target document by looking at the keys of the expressions
 	 * from the source.
 	 */
-	static class LinkageDocument {
+	static final class LinkageDocument {
 
 		static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\?#\\{#?(?<fieldName>[\\w\\d\\.\\-)]*)\\}");
 		static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("###_(?<index>\\d*)_###");
@@ -232,7 +232,7 @@ class DocumentPointerFactory {
 						attribute = attribute.substring(attribute.lastIndexOf('.') + 1);
 					}
 
-					String fieldName = entry.getKey().equals("_id") ? "id" : entry.getKey();
+					String fieldName = "_id".equals(entry.getKey()) ? "id" : entry.getKey();
 					if (!fieldName.contains(".")) {
 
 						Object targetValue = propertyAccessor.getProperty(persistentEntity.getPersistentProperty(fieldName));

@@ -15,9 +15,9 @@
  */
 package org.springframework.data.mongodb.core.aggregation;
 
-import static org.springframework.data.mongodb.core.DocumentTestUtils.*;
+import static org.springframework.data.mongodb.core.DocumentTestUtils.getAsDocument;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
-import static org.springframework.data.mongodb.core.aggregation.Fields.*;
+import static org.springframework.data.mongodb.core.aggregation.Fields.field;
 import static org.springframework.data.mongodb.test.util.Assertions.*;
 
 import lombok.AllArgsConstructor;
@@ -479,21 +479,11 @@ public class TypeBasedAggregationOperationContextUnitTests {
 	}
 
 	Converter<Age, org.bson.Document> ageWriteConverter() {
-		return new Converter<Age, org.bson.Document>() {
-			@Override
-			public org.bson.Document convert(Age age) {
-				return new org.bson.Document("v", age.value);
-			}
-		};
+		return age -> new org.bson.Document("v", age.value);
 	}
 
 	Converter<org.bson.Document, Age> ageReadConverter() {
-		return new Converter<org.bson.Document, Age>() {
-			@Override
-			public Age convert(org.bson.Document document) {
-				return new Age(((Integer) document.get("v")));
-			}
-		};
+		return document -> new Age(((Integer) document.get("v")));
 	}
 
 	@SuppressWarnings("unchecked")

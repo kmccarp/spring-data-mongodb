@@ -15,9 +15,9 @@
  */
 package org.springframework.data.mongodb.core;
 
-import static java.util.UUID.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
+import static java.util.UUID.randomUUID;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.script.ExecutableMongoScript;
 import org.springframework.data.mongodb.core.script.NamedMongoScript;
 import org.springframework.util.Assert;
@@ -37,7 +36,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -88,17 +86,13 @@ class DefaultScriptOperations implements ScriptOperations {
 
 		Assert.notNull(script, "Script must not be null");
 
-		return mongoOperations.execute(new DbCallback<Object>() {
+		return mongoOperations.execute(db -> {
 
-			@Override
-			public Object doInDB(MongoDatabase db) throws MongoException, DataAccessException {
-
-				Document command = new Document("$eval", script.getCode());
-				BasicDBList commandArgs = new BasicDBList();
-				commandArgs.addAll(Arrays.asList(convertScriptArgs(false, args)));
-				command.append("args", commandArgs);
-				return db.runCommand(command).get("retval");
-			}
+			Document command = new Document("$eval", script.getCode());
+			BasicDBList commandArgs = new BasicDBList();
+			commandArgs.addAll(Arrays.asList(convertScriptArgs(false, args)));
+			command.append("args", commandArgs);
+			return db.runCommand(command).get("retval");
 		});
 	}
 
@@ -107,15 +101,8 @@ class DefaultScriptOperations implements ScriptOperations {
 
 		Assert.hasText(scriptName, "ScriptName must not be null or empty");
 
-		return mongoOperations.execute(new DbCallback<Object>() {
-
-			@Override
-			public Object doInDB(MongoDatabase db) throws MongoException, DataAccessException {
-
-				return db.runCommand(new Document("eval", String.format("%s(%s)", scriptName, convertAndJoinScriptArgs(args))))
-						.get("retval");
-			}
-		});
+		return mongoOperations.execute(db -> db.runCommand(new Document("eval", String.format("%s(%s)", scriptName, convertAndJoinScriptArgs(args))))
+				.get("retval"));
 	}
 
 	@Override
@@ -135,7 +122,7 @@ class DefaultScriptOperations implements ScriptOperations {
 			return Collections.emptySet();
 		}
 
-		Set<String> scriptNames = new HashSet<String>();
+		Set<String> scriptNames = new HashSet<>();
 
 		for (NamedMongoScript script : scripts) {
 			scriptNames.add(script.getName());
@@ -150,7 +137,7 @@ class DefaultScriptOperations implements ScriptOperations {
 			return args;
 		}
 
-		List<Object> convertedValues = new ArrayList<Object>(args.length);
+		List<Object> convertedValues = new ArrayList<>(args.length);
 
 		for (Object arg : args) {
 			convertedValues.add(arg instanceof String && quote ? String.format("'%s'", arg)

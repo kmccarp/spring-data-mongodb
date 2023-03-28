@@ -15,8 +15,8 @@
  */
 package org.springframework.data.mongodb.performance;
 
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -87,7 +87,7 @@ public class PerformanceTests {
 		this.converter = new MappingMongoConverter(new DefaultDbRefResolver(mongoDbFactory), context);
 		this.operations = new MongoTemplate(new SimpleMongoClientDatabaseFactory(this.mongo, DATABASE_NAME), converter);
 
-		MongoRepositoryFactoryBean<PersonRepository, Person, ObjectId> factory = new MongoRepositoryFactoryBean<PersonRepository, Person, ObjectId>(
+		MongoRepositoryFactoryBean<PersonRepository, Person, ObjectId> factory = new MongoRepositoryFactoryBean<>(
 				PersonRepository.class);
 		factory.setMongoOperations(operations);
 		factory.afterPropertiesSet();
@@ -101,17 +101,15 @@ public class PerformanceTests {
 
 	@Test
 	public void writeWithWriteConcerns() {
-		executeWithWriteConcerns(new WriteConcernCallback() {
-			public void doWithWriteConcern(String constantName, WriteConcern concern) {
-				writeHeadline("WriteConcern: " + constantName);
-				System.out.println(String.format("Writing %s objects using plain driver took %sms", NUMBER_OF_PERSONS,
-						writingObjectsUsingPlainDriver(NUMBER_OF_PERSONS, concern)));
-				System.out.println(String.format("Writing %s objects using template took %sms", NUMBER_OF_PERSONS,
-						writingObjectsUsingMongoTemplate(NUMBER_OF_PERSONS, concern)));
-				System.out.println(String.format("Writing %s objects using repository took %sms", NUMBER_OF_PERSONS,
-						writingObjectsUsingRepositories(NUMBER_OF_PERSONS, concern)));
-				writeFooter();
-			}
+		executeWithWriteConcerns((constantName, concern) -> {
+			writeHeadline("WriteConcern: " + constantName);
+			System.out.println(String.format("Writing %s objects using plain driver took %sms", NUMBER_OF_PERSONS,
+					writingObjectsUsingPlainDriver(NUMBER_OF_PERSONS, concern)));
+			System.out.println(String.format("Writing %s objects using template took %sms", NUMBER_OF_PERSONS,
+					writingObjectsUsingMongoTemplate(NUMBER_OF_PERSONS, concern)));
+			System.out.println(String.format("Writing %s objects using repository took %sms", NUMBER_OF_PERSONS,
+					writingObjectsUsingRepositories(NUMBER_OF_PERSONS, concern)));
+			writeFooter();
 		});
 	}
 
@@ -133,19 +131,15 @@ public class PerformanceTests {
 
 	private long convertDirectly(final List<Document> documents) {
 
-		executeWatched(new WatchCallback<List<Person>>() {
+		executeWatched(() -> {
 
-			@Override
-			public List<Person> doInWatch() {
+			List<Person> persons = new ArrayList<>();
 
-				List<Person> persons = new ArrayList<PerformanceTests.Person>();
-
-				for (Document document : documents) {
-					persons.add(Person.from(document));
-				}
-
-				return persons;
+			for (Document document : documents) {
+				persons.add(Person.from(document));
 			}
+
+			return persons;
 		});
 
 		return watch.getLastTaskTimeMillis();
@@ -153,19 +147,15 @@ public class PerformanceTests {
 
 	private long convertUsingConverter(final List<Document> documents) {
 
-		executeWatched(new WatchCallback<List<Person>>() {
+		executeWatched(() -> {
 
-			@Override
-			public List<Person> doInWatch() {
+			List<Person> persons = new ArrayList<>();
 
-				List<Person> persons = new ArrayList<PerformanceTests.Person>();
-
-				for (Document document : documents) {
-					persons.add(converter.read(Person.class, document));
-				}
-
-				return persons;
+			for (Document document : documents) {
+				persons.add(converter.read(Person.class, document));
 			}
+
+			return persons;
 		});
 
 		return watch.getLastTaskTimeMillis();
@@ -276,7 +266,6 @@ public class PerformanceTests {
 
 		MongoCollection<Document> collection = mongo.getDatabase(DATABASE_NAME).getCollection("driver")
 				.withWriteConcern(writeConcern);
-		;
 		List<Person> persons = getPersonObjects(numberOfPersons);
 
 		executeWatched(() -> persons.stream().map(Person::toDocument).map(it -> {
@@ -344,11 +333,11 @@ public class PerformanceTests {
 
 	private List<Person> getPersonObjects(int numberOfPersons) {
 
-		List<Person> result = new ArrayList<Person>();
+		List<Person> result = new ArrayList<>();
 
 		for (int i = 0; i < numberOfPersons; i++) {
 
-			List<Address> addresses = new ArrayList<Address>();
+			List<Address> addresses = new ArrayList<>();
 
 			for (int a = 0; a < 5; a++) {
 				addresses.add(new Address("zip" + a, "city" + a));
@@ -368,7 +357,7 @@ public class PerformanceTests {
 
 	private List<Document> getPersonDocuments(int numberOfPersons) {
 
-		List<Document> documents = new ArrayList<Document>(numberOfPersons);
+		List<Document> documents = new ArrayList<>(numberOfPersons);
 
 		for (Person person : getPersonObjects(numberOfPersons)) {
 			documents.add(person.toDocument());
@@ -390,7 +379,7 @@ public class PerformanceTests {
 
 	private static List<Person> toPersons(FindIterable<Document> cursor) {
 
-		List<Person> persons = new ArrayList<Person>();
+		List<Person> persons = new ArrayList<>();
 
 		Iterator<Document> it = cursor.iterator();
 		while (it.hasNext()) {
@@ -403,7 +392,8 @@ public class PerformanceTests {
 	static class Person {
 
 		ObjectId id;
-		String firstname, lastname;
+		String firstname;
+		String lastname;
 		List<Address> addresses;
 		Set<Order> orders;
 
@@ -411,19 +401,19 @@ public class PerformanceTests {
 			this.firstname = firstname;
 			this.lastname = lastname;
 			this.addresses = addresses;
-			this.orders = new HashSet<Order>();
+			this.orders = new HashSet<>();
 		}
 
 		public static Person from(Document source) {
 
 			List addressesSource = (List) source.get("addresses");
-			List<Address> addresses = new ArrayList<Address>(addressesSource.size());
+			List<Address> addresses = new ArrayList<>(addressesSource.size());
 			for (Object addressSource : addressesSource) {
 				addresses.add(Address.from((Document) addressSource));
 			}
 
 			List ordersSource = (List) source.get("orders");
-			Set<Order> orders = new HashSet<Order>(ordersSource.size());
+			Set<Order> orders = new HashSet<>(ordersSource.size());
 			for (Object orderSource : ordersSource) {
 				orders.add(Order.from((Document) orderSource));
 			}
@@ -451,7 +441,7 @@ public class PerformanceTests {
 		final Set<AddressType> types;
 
 		public Address(String zipCode, String city) {
-			this(zipCode, city, new HashSet<AddressType>(pickRandomNumerOfItemsFrom(Arrays.asList(AddressType.values()))));
+			this(zipCode, city, new HashSet<>(pickRandomNumerOfItemsFrom(Arrays.asList(AddressType.values()))));
 		}
 
 		@PersistenceConstructor
@@ -480,7 +470,7 @@ public class PerformanceTests {
 
 	private static <T extends Enum<T>> List<T> readFromBasicDBList(List<Document> source, Class<T> type) {
 
-		List<T> result = new ArrayList<T>(source.size());
+		List<T> result = new ArrayList<>(source.size());
 		for (Object object : source) {
 			result.add(Enum.valueOf(type, object.toString()));
 		}
@@ -498,8 +488,8 @@ public class PerformanceTests {
 
 	static class Order implements Convertible {
 
-		static enum Status {
-			ORDERED, PAYED, SHIPPED;
+		enum Status {
+			ORDERED, PAYED, SHIPPED
 		}
 
 		Date createdAt;
@@ -522,7 +512,7 @@ public class PerformanceTests {
 		public static Order from(Document source) {
 
 			List<Document> lineItemsSource = (List<Document>) source.get("lineItems");
-			List<LineItem> lineItems = new ArrayList<PerformanceTests.LineItem>(lineItemsSource.size());
+			List<LineItem> lineItems = new ArrayList<>(lineItemsSource.size());
 			for (Object lineItemSource : lineItemsSource) {
 				lineItems.add(LineItem.from((Document) lineItemSource));
 			}
@@ -593,7 +583,7 @@ public class PerformanceTests {
 		int numberOfItems = random.nextInt(source.size());
 		numberOfItems = numberOfItems == 0 ? 1 : numberOfItems;
 
-		List<T> result = new ArrayList<T>(numberOfItems);
+		List<T> result = new ArrayList<>(numberOfItems);
 		while (result.size() < numberOfItems) {
 			int index = random.nextInt(source.size());
 			T candidate = source.get(index);
@@ -605,8 +595,8 @@ public class PerformanceTests {
 		return result;
 	}
 
-	static enum AddressType {
-		SHIPPING, BILLING;
+	enum AddressType {
+		SHIPPING, BILLING
 	}
 
 	private interface WriteConcernCallback {
@@ -635,12 +625,12 @@ public class PerformanceTests {
 		return result;
 	}
 
-	static enum Api {
-		DRIVER, TEMPLATE, REPOSITORY, DIRECT, CONVERTER;
+	enum Api {
+		DRIVER, TEMPLATE, REPOSITORY, DIRECT, CONVERTER
 	}
 
-	static enum Mode {
-		WRITE, READ, QUERY;
+	enum Mode {
+		WRITE, READ, QUERY
 	}
 
 	private static class Statistics {
@@ -651,7 +641,7 @@ public class PerformanceTests {
 		public Statistics(String headline) {
 
 			this.headline = headline;
-			this.times = new HashMap<Mode, ModeTimes>();
+			this.times = new HashMap<>();
 
 			for (Mode mode : Mode.values()) {
 				times.put(mode, new ModeTimes(mode));
@@ -726,7 +716,7 @@ public class PerformanceTests {
 		public ApiTimes(Api api, Mode mode) {
 			this.api = api;
 			this.mode = mode;
-			this.times = new ArrayList<Double>();
+			this.times = new ArrayList<>();
 		}
 
 		public void add(double time) {
@@ -754,7 +744,7 @@ public class PerformanceTests {
 				return 0.0;
 			}
 
-			ArrayList<Double> list = new ArrayList<Double>(times);
+			ArrayList<Double> list = new ArrayList<>(times);
 			Collections.sort(list);
 
 			int size = list.size();
@@ -814,7 +804,7 @@ public class PerformanceTests {
 
 		public ModeTimes(Mode mode) {
 
-			this.times = new HashMap<Api, ApiTimes>();
+			this.times = new HashMap<>();
 
 			for (Api api : Api.values()) {
 				this.times.put(api, new ApiTimes(api, mode));

@@ -101,14 +101,11 @@ public class ReactiveMongoTemplateCollationTests {
 	@SuppressWarnings("unchecked")
 	private Mono<Document> getCollectionInfo(String collectionName) {
 
-		return template.execute(db -> {
-
-			return Flux.from(db.runCommand(new Document() //
+		return template.execute(db -> Flux.from(db.runCommand(new Document() //
 					.append("listCollections", 1) //
 					.append("filter", new Document("name", collectionName)))) //
 					.map(it -> it.get("cursor", Document.class))
-					.flatMapIterable(it -> (List<Document>) it.get("firstBatch", List.class));
-		}).next();
+					.flatMapIterable(it -> (List<Document>) it.get("firstBatch", List.class))).next();
 	}
 
 }
