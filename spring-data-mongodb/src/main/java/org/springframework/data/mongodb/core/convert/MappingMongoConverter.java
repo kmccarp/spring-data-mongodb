@@ -116,7 +116,7 @@ public class MappingMongoConverter extends AbstractMongoConverter implements App
 
 	protected @Nullable ApplicationContext applicationContext;
 	protected MongoTypeMapper typeMapper;
-	protected @Nullable String mapKeyDotReplacement = null;
+	protected @Nullable String mapKeyDotReplacement;
 	protected @Nullable CodecRegistryProvider codecRegistryProvider;
 
 	private MongoTypeMapper defaultTypeMapper;
@@ -715,7 +715,7 @@ public class MappingMongoConverter extends AbstractMongoConverter implements App
 	public DocumentPointer toDocumentPointer(Object source, @Nullable MongoPersistentProperty referringProperty) {
 
 		if (source instanceof LazyLoadingProxy) {
-			return () -> ((LazyLoadingProxy) source).getSource();
+			return ((LazyLoadingProxy) source)::getSource;
 		}
 
 		Assert.notNull(referringProperty, "Cannot create DocumentReference; The referringProperty must not be null");
@@ -908,13 +908,7 @@ public class MappingMongoConverter extends AbstractMongoConverter implements App
 
 		if (conversions.hasValueConverter(prop)) {
 			accessor.put(prop, conversions.getPropertyValueConversions().getValueConverter(prop).write(obj,
-					new MongoConversionContext(new PropertyValueProvider<>() {
-						@Nullable
-						@Override
-						public <T> T getPropertyValue(MongoPersistentProperty property) {
-							return (T) persistentPropertyAccessor.getProperty(property);
-						}
-					}, prop, this, spELContext)));
+					new MongoConversionContext(property -> (T) persistentPropertyAccessor.getProperty(property), prop, this, spELContext)));
 			return;
 		}
 
@@ -1006,10 +1000,8 @@ public class MappingMongoConverter extends AbstractMongoConverter implements App
 
 			if (property.isAssociation()) {
 
-				List<Object> targetCollection = collection.stream().map(it -> {
-					return documentPointerFactory.computePointer(mappingContext, property, it, property.getActualType())
-							.getPointer();
-				}).collect(Collectors.toList());
+				List<Object> targetCollection = collection.stream().map(it -> documentPointerFactory.computePointer(mappingContext, property, it, property.getActualType())
+							.getPointer()).collect(Collectors.toList());
 
 				return writeCollectionInternal(targetCollection, TypeInformation.of(DocumentPointer.class),
 						new ArrayList<>(targetCollection.size()));
@@ -2443,7 +2435,7 @@ public class MappingMongoConverter extends AbstractMongoConverter implements App
 		}
 	}
 
-	private static class PropertyTranslatingPropertyAccessor<T> implements PersistentPropertyPathAccessor<T> {
+	private static final class PropertyTranslatingPropertyAccessor<T> implements PersistentPropertyPathAccessor<T> {
 
 		private final PersistentPropertyAccessor<T> delegate;
 		private final PersistentPropertyTranslator propertyTranslator;

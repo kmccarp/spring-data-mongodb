@@ -43,7 +43,7 @@ public interface AggregationExpression extends MongoExpression {
 			return AggregationExpression.class.cast(expression);
 		}
 
-		return (context) -> context.getMappedObject(expression.toDocument());
+		return context -> context.getMappedObject(expression.toDocument());
 	}
 
 	/**

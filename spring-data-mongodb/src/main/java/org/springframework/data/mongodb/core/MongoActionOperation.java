@@ -25,5 +25,5 @@ package org.springframework.data.mongodb.core;
  */
 public enum MongoActionOperation {
 
-	REMOVE, UPDATE, INSERT, INSERT_LIST, SAVE, BULK;
+	REMOVE, UPDATE, INSERT, INSERT_LIST, SAVE, BULK
 }

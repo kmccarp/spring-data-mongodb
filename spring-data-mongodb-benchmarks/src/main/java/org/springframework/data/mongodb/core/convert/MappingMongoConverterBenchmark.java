@@ -55,7 +55,8 @@ public class MappingMongoConverterBenchmark extends AbstractMicrobenchmark {
 	private MongoClient client;
 	private MongoMappingContext mappingContext;
 	private MappingMongoConverter converter;
-	private Document documentWith2Properties, documentWith2PropertiesAnd1Nested;
+	private Document documentWith2Properties;
+	private Document documentWith2PropertiesAnd1Nested;
 	private Customer objectWith2PropertiesAnd1Nested;
 
 	private Document documentWithFlatAndComplexPropertiesPlusListAndMap;
@@ -156,22 +157,26 @@ public class MappingMongoConverterBenchmark extends AbstractMicrobenchmark {
 	static class Customer {
 
 		private @Id ObjectId id;
-		private final String firstname, lastname;
+		private final String firstname;
+		private final String lastname;
 		private final Address address;
 	}
 
 	@Getter
 	@AllArgsConstructor
 	static class Address {
-		private String zipCode, city;
+		private String zipCode;
+		private String city;
 	}
 
 	@Data
 	static class SlightlyMoreComplexObject {
 
 		@Id String id;
-		int intOne, intTwo;
-		String stringOne, stringTwo;
+		int intOne;
+		int intTwo;
+		String stringOne;
+		String stringTwo;
 		@Field("explicit-field-name") String renamedField;
 		Point location;
 		Customer customer;

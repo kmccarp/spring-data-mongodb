@@ -327,7 +327,7 @@ public class ApplicationContextEventTests {
 	@Test // DATAMONGO-1271
 	public void publishesAfterLoadAndAfterConvertEventsForMapOfDBRef() {
 
-		Map<String, Related> references = new LinkedHashMap<String, Related>();
+		Map<String, Related> references = new LinkedHashMap<>();
 		references.put("ref-1", new Related(20L, "ref 1"));
 		references.put("ref-2", new Related(30L, "ref 2"));
 
@@ -355,7 +355,7 @@ public class ApplicationContextEventTests {
 	@Test // DATAMONGO-1271
 	public void publishesAfterLoadAndAfterConvertEventsForLazyLoadingMapOfDBRef() {
 
-		Map<String, Related> references = new LinkedHashMap<String, Related>();
+		Map<String, Related> references = new LinkedHashMap<>();
 		references.put("ref-1", new Related(20L, "ref 1"));
 		references.put("ref-2", new Related(30L, "ref 2"));
 

@@ -50,7 +50,9 @@ public class QueryByExampleTests {
 	@Template(initialEntitySet = Person.class) //
 	static MongoTestTemplate operations;
 
-	Person p1, p2, p3;
+	Person p1;
+	Person p2;
+	Person p3;
 
 	@BeforeEach
 	public void setUp() {
@@ -226,7 +228,8 @@ public class QueryByExampleTests {
 	static class Person {
 
 		@Id String id;
-		String firstname, middlename;
+		String firstname;
+		String middlename;
 		@Field("last_name") String lastname;
 	}
 
@@ -234,7 +237,8 @@ public class QueryByExampleTests {
 	@ToString
 	static class NotAPersonButStillMatchingFields {
 
-		String firstname, middlename;
+		String firstname;
+		String middlename;
 		@Field("last_name") String lastname;
 	}
 

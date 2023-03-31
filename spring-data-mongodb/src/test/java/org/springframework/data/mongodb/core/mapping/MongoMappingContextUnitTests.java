@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.data.mapping.model.FieldNamingStrategy;
 
 import com.mongodb.DBRef;
 
@@ -78,12 +77,7 @@ public class MongoMappingContextUnitTests {
 
 		MongoMappingContext context = new MongoMappingContext();
 		context.setApplicationContext(applicationContext);
-		context.setFieldNamingStrategy(new FieldNamingStrategy() {
-
-			public String getFieldName(PersistentProperty<?> property) {
-				return property.getName().toUpperCase(Locale.US);
-			}
-		});
+		context.setFieldNamingStrategy(property -> property.getName().toUpperCase(Locale.US));
 
 		MongoPersistentEntity<?> entity = context.getRequiredPersistentEntity(Person.class);
 		assertThat(entity.getRequiredPersistentProperty("firstname").getFieldName()).isEqualTo("FIRSTNAME");
@@ -180,7 +174,7 @@ public class MongoMappingContextUnitTests {
 		MongoMappingContext context = new MongoMappingContext();
 		MongoPersistentEntity<?> entity = context.getRequiredPersistentEntity(InterfaceWithMethodReturningOptional.class);
 
-		assertThat(context.getPersistentEntities()).map(it -> it.getType()).doesNotContain((Class)
+		assertThat(context.getPersistentEntities()).map(PersistentEntity::getType).doesNotContain((Class)
 				Optional.class).contains((Class)Person.class);
 	}
 
@@ -190,7 +184,7 @@ public class MongoMappingContextUnitTests {
 		MongoMappingContext context = new MongoMappingContext();
 		MongoPersistentEntity<?> entity = context.getRequiredPersistentEntity(ClassWithOptionalField.class);
 
-		assertThat(context.getPersistentEntities()).map(it -> it.getType()).doesNotContain((Class)
+		assertThat(context.getPersistentEntities()).map(PersistentEntity::getType).doesNotContain((Class)
 				Optional.class).contains((Class)Person.class);
 	}
 
@@ -201,12 +195,16 @@ public class MongoMappingContextUnitTests {
 
 	class Person {
 
-		String firstname, lastname;
+		String firstname;
+		String lastname;
 	}
 
 	class InvalidPerson {
 
-		@org.springframework.data.mongodb.core.mapping.Field("foo") String firstname, lastname;
+		@org.springframework.data.mongodb.core.mapping.Field("foo")
+		String firstname;
+		@org.springframework.data.mongodb.core.mapping.Field("foo")
+		String lastname;
 	}
 
 	class Parent {

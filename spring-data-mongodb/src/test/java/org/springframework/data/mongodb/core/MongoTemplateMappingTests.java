@@ -15,9 +15,9 @@
  */
 package org.springframework.data.mongodb.core;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import lombok.Data;
 
@@ -29,12 +29,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.annotation.Id;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.geojson.Geometry;
 import com.mongodb.client.model.geojson.MultiPolygon;
@@ -126,12 +124,10 @@ public class MongoTemplateMappingTests {
 	}
 
 	private void checkPersonPersisted(MongoTemplate template) {
-		template.execute(Person.class, new CollectionCallback<Object>() {
-			public Object doInCollection(MongoCollection<Document> collection) throws MongoException, DataAccessException {
-				Document document = collection.find(new Document()).first();
-				assertThat((String) document.get("name")).isEqualTo("Oliver");
-				return null;
-			}
+		template.execute(Person.class, collection -> {
+			Document document = collection.find(new Document()).first();
+			assertThat((String) document.get("name")).isEqualTo("Oliver");
+			return null;
 		});
 	}
 }

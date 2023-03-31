@@ -40,7 +40,7 @@ public class AbstractMongoEventListenerUnitTests {
 	@Test
 	public void invokesCallbackForEventForPerson() {
 
-		MongoMappingEvent<Person> event = new BeforeConvertEvent<Person>(new Person("Dave", "Matthews"), "collection-1");
+		MongoMappingEvent<Person> event = new BeforeConvertEvent<>(new Person("Dave", "Matthews"), "collection-1");
 		SamplePersonEventListener listener = new SamplePersonEventListener();
 		listener.onApplicationEvent(event);
 		assertThat(listener.invokedOnBeforeConvert).isTrue();
@@ -69,7 +69,7 @@ public class AbstractMongoEventListenerUnitTests {
 	public void afterLoadEffectGetsHandledCorrectly() {
 
 		SamplePersonEventListener listener = new SamplePersonEventListener();
-		listener.onApplicationEvent(new AfterLoadEvent<Person>(new Document(), Person.class, "collection-1"));
+		listener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Person.class, "collection-1"));
 		assertThat(listener.invokedOnAfterLoad).isTrue();
 	}
 
@@ -78,8 +78,8 @@ public class AbstractMongoEventListenerUnitTests {
 
 		SamplePersonEventListener personListener = new SamplePersonEventListener();
 		SampleAccountEventListener accountListener = new SampleAccountEventListener();
-		personListener.onApplicationEvent(new AfterLoadEvent<Person>(new Document(), Person.class, "collection-1"));
-		accountListener.onApplicationEvent(new AfterLoadEvent<Person>(new Document(), Person.class, "collection-1"));
+		personListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Person.class, "collection-1"));
+		accountListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Person.class, "collection-1"));
 
 		assertThat(personListener.invokedOnAfterLoad).isTrue();
 		assertThat(accountListener.invokedOnAfterLoad).isFalse();
@@ -90,8 +90,8 @@ public class AbstractMongoEventListenerUnitTests {
 
 		SamplePersonEventListener personListener = new SamplePersonEventListener();
 		SampleContactEventListener contactListener = new SampleContactEventListener();
-		personListener.onApplicationEvent(new AfterLoadEvent<Person>(new Document(), Person.class, "collection-1"));
-		contactListener.onApplicationEvent(new AfterLoadEvent<Person>(new Document(), Person.class, "collection-1"));
+		personListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Person.class, "collection-1"));
+		contactListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Person.class, "collection-1"));
 
 		assertThat(personListener.invokedOnAfterLoad).isTrue();
 		assertThat(contactListener.invokedOnAfterLoad).isTrue();
@@ -102,8 +102,8 @@ public class AbstractMongoEventListenerUnitTests {
 
 		SamplePersonEventListener personListener = new SamplePersonEventListener();
 		SampleContactEventListener contactListener = new SampleContactEventListener();
-		personListener.onApplicationEvent(new AfterLoadEvent<Contact>(new Document(), Contact.class, "collection-1"));
-		contactListener.onApplicationEvent(new AfterLoadEvent<Contact>(new Document(), Contact.class, "collection-1"));
+		personListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Contact.class, "collection-1"));
+		contactListener.onApplicationEvent(new AfterLoadEvent<>(new Document(), Contact.class, "collection-1"));
 
 		assertThat(personListener.invokedOnAfterLoad).isFalse();
 		assertThat(contactListener.invokedOnAfterLoad).isTrue();

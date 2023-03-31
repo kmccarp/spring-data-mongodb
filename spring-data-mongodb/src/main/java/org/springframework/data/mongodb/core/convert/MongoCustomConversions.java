@@ -153,7 +153,7 @@ public class MongoCustomConversions extends org.springframework.data.convert.Cus
 		private static final Set<Class<?>> JAVA_DRIVER_TIME_SIMPLE_TYPES = new HashSet<>(
 				Arrays.asList(LocalDate.class, LocalTime.class, LocalDateTime.class));
 
-		private boolean useNativeDriverJavaTimeCodecs = false;
+		private boolean useNativeDriverJavaTimeCodecs;
 		private final List<Object> customConverters = new ArrayList<>();
 
 		private final PropertyValueConversions internalValueConversion = PropertyValueConversions.simple(it -> {});

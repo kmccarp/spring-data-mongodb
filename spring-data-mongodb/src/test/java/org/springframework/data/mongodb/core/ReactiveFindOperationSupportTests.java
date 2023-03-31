@@ -737,7 +737,7 @@ class ReactiveFindOperationSupportTests implements StateFunctions {
 	}
 
 	static <T> Consumer<T> in(T... values) {
-		return (val) -> {
+		return val -> {
 			assertThat(values).contains(val);
 		};
 	}

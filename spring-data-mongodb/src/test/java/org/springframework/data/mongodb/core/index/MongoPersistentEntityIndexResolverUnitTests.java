@@ -1578,7 +1578,7 @@ public class MongoPersistentEntityIndexResolverUnitTests {
 		class SimilarityHolingBean {
 
 			@Indexed @Field("norm") String normalProperty;
-			@Field("similarityL") private List<SimilaritySibling> listOfSimilarilyNamedEntities = null;
+			@Field("similarityL") private List<SimilaritySibling> listOfSimilarilyNamedEntities;
 		}
 
 		class SimilaritySibling {

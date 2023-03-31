@@ -185,7 +185,7 @@ public interface MongoConverter
 			return getConversionService().canConvert(id.getClass(), targetType)
 					? getConversionService().convert(id, targetType)
 					: convertToMongoType(id, (TypeInformation<?>) null);
-		} catch (ConversionException o_O) {
+		} catch (ConversionException oO) {
 			return convertToMongoType(id,(TypeInformation<?>)  null);
 		}
 	}

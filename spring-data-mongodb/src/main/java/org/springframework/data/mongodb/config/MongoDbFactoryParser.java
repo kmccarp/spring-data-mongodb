@@ -55,7 +55,7 @@ public class MongoDbFactoryParser extends AbstractBeanDefinitionParser {
 
 	static {
 
-		Set<String> mongoUriAllowedAdditionalAttributes = new HashSet<String>();
+		Set<String> mongoUriAllowedAdditionalAttributes = new HashSet<>();
 		mongoUriAllowedAdditionalAttributes.add("id");
 		mongoUriAllowedAdditionalAttributes.add("write-concern");
 

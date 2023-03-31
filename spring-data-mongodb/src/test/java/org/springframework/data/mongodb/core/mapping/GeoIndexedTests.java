@@ -15,7 +15,7 @@
  */
 package org.springframework.data.mongodb.core.mapping;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +27,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.test.util.MongoTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -82,19 +79,17 @@ public class GeoIndexedTests {
 		GeoLocation geo = new GeoLocation(new double[] { 40.714346, -74.005966 });
 		template.insert(geo);
 
-		boolean hasIndex = template.execute("geolocation", new CollectionCallback<Boolean>() {
-			public Boolean doInCollection(MongoCollection<Document> collection) throws MongoException, DataAccessException {
+		boolean hasIndex = template.execute("geolocation", collection -> {
 
-				List<Document> indexes = new ArrayList<Document>();
-				collection.listIndexes(Document.class).into(indexes);
+			List<Document> indexes = new ArrayList<>();
+			collection.listIndexes(Document.class).into(indexes);
 
-				for (Document document : indexes) {
-					if ("location".equals(document.get("name"))) {
-						return true;
-					}
+			for (Document document : indexes) {
+				if ("location".equals(document.get("name"))) {
+					return true;
 				}
-				return false;
 			}
+			return false;
 		});
 
 		assertThat(hasIndex).isTrue();

@@ -15,9 +15,9 @@
  */
 package org.springframework.data.mongodb.core;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
-import static org.springframework.data.mongodb.core.query.Query.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -38,8 +38,6 @@ import org.springframework.data.mongodb.test.util.EnableIfMongoServerVersion;
 import org.springframework.data.mongodb.test.util.EnableIfReplicaSetAvailable;
 import org.springframework.data.mongodb.test.util.MongoClientExtension;
 import org.springframework.data.mongodb.test.util.MongoTestUtils;
-import org.springframework.transaction.ReactiveTransaction;
-import org.springframework.transaction.reactive.TransactionCallback;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -172,17 +170,8 @@ public class ReactiveMongoTemplateTransactionTests {
 	@Test // DATAMONGO-1970
 	public void changesNotVisibleOutsideTransaction() {
 
-		initTx().execute(new TransactionCallback<>() {
-			@Override
-			public Publisher<Object> doInTransaction(ReactiveTransaction status) {
-				return template.remove(ID_QUERY, Document.class, COLLECTION_NAME).flatMapMany(val -> {
-
-					// once we use the collection directly we're no longer participating in the tx
-					return client.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME).find(ID_QUERY.getQueryObject())
-							.first();
-				});
-			}
-		}).as(StepVerifier::create).expectNext(DOCUMENT).verifyComplete();
+		initTx().execute(status -> template.remove(ID_QUERY, Document.class, COLLECTION_NAME).flatMapMany(val -> client.getDatabase(DATABASE_NAME).getCollection(COLLECTION_NAME).find(ID_QUERY.getQueryObject())
+				.first())).as(StepVerifier::create).expectNext(DOCUMENT).verifyComplete();
 
 		template.exists(ID_QUERY, COLLECTION_NAME) //
 				.as(StepVerifier::create) //
@@ -195,9 +184,7 @@ public class ReactiveMongoTemplateTransactionTests {
 
 		ReactiveSessionScoped sessionScoped = template.withSession(client.startSession());
 
-		sessionScoped.execute(action -> {
-			return action.remove(ID_QUERY, Document.class, COLLECTION_NAME);
-		}) //
+		sessionScoped.execute(action -> action.remove(ID_QUERY, Document.class, COLLECTION_NAME)) //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
@@ -207,9 +194,7 @@ public class ReactiveMongoTemplateTransactionTests {
 				.expectNext(false) //
 				.verifyComplete();
 
-		sessionScoped.execute(action -> {
-			return action.insert(DOCUMENT, COLLECTION_NAME);
-		}) //
+		sessionScoped.execute(action -> action.insert(DOCUMENT, COLLECTION_NAME)) //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
@@ -239,19 +224,11 @@ public class ReactiveMongoTemplateTransactionTests {
 	@Test // DATAMONGO-1970
 	public void errorInFlowOutsideTransactionDoesNotAbortIt() {
 
-		initTx().execute(new TransactionCallback<>() {
-			@Override
-			public Publisher<Object> doInTransaction(ReactiveTransaction status) {
-				return template.find(query(where("age").is(22)).with(Sort.by("age")), Person.class).buffer(2)
-						.flatMap(values -> {
-
-							return template
-									.remove(query(where("id").in(values.stream().map(Person::getId).collect(Collectors.toList()))),
-											Person.class)
-									.then(Mono.just(values));
-						});
-			}
-		}).collectList() // completes the above computation
+		initTx().execute(status -> template.find(query(where("age").is(22)).with(Sort.by("age")), Person.class).buffer(2)
+						.flatMap(values -> template
+								.remove(query(where("id").in(values.stream().map(Person::getId).collect(Collectors.toList()))),
+										Person.class)
+								.then(Mono.just(values)))).collectList() // completes the above computation
 				.flatMap(deleted -> {
 					throw new RuntimeException("error outside the transaction does not influence it.");
 				}).as(StepVerifier::create) //
