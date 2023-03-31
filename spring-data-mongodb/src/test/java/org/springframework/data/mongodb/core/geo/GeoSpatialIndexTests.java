@@ -15,7 +15,7 @@
  */
 package org.springframework.data.mongodb.core.geo;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.config.AbstractIntegrationTests;
-import org.springframework.data.mongodb.core.CollectionCallback;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.WriteResultChecking;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
@@ -37,7 +35,6 @@ import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.test.util.EnableIfMongoServerVersion;
 
-import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 
@@ -123,30 +120,25 @@ public class GeoSpatialIndexTests extends AbstractIntegrationTests {
 	 */
 	private boolean hasIndexOfType(Class<?> entityType, final String type) {
 
-		return template.execute(entityType, new CollectionCallback<Boolean>() {
+		return template.execute(entityType, collection -> {
 
-			@SuppressWarnings("unchecked")
-			public Boolean doInCollection(MongoCollection<org.bson.Document> collection)
-					throws MongoException, DataAccessException {
+			List<org.bson.Document> indexes = new ArrayList<>();
+			collection.listIndexes(org.bson.Document.class).into(indexes);
 
-				List<org.bson.Document> indexes = new ArrayList<org.bson.Document>();
-				collection.listIndexes(org.bson.Document.class).into(indexes);
+			for (org.bson.Document indexInfo : indexes) {
 
-				for (org.bson.Document indexInfo : indexes) {
+				org.bson.Document keys = (org.bson.Document) indexInfo.get("key");
+				Map<String, Object> keysMap = keys;
 
-					org.bson.Document keys = (org.bson.Document) indexInfo.get("key");
-					Map<String, Object> keysMap = keys;
-
-					for (String key : keysMap.keySet()) {
-						Object indexType = keys.get(key);
-						if (type.equals(indexType)) {
-							return true;
-						}
+				for (String key : keysMap.keySet()) {
+					Object indexType = keys.get(key);
+					if (type.equals(indexType)) {
+						return true;
 					}
 				}
-
-				return false;
 			}
+
+			return false;
 		});
 	}
 
@@ -174,7 +166,7 @@ public class GeoSpatialIndexTests extends AbstractIntegrationTests {
 
 	static class GeoJsonPoint {
 		String type = "Point";
-		double coordinates[];
+		double[] coordinates;
 	}
 
 	@Document

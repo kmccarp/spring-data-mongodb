@@ -309,7 +309,7 @@ public class MongoPersistentEntityIndexResolver implements IndexResolver {
 				if (!it.hasNext()) {
 					name += it.next() + "_TextIndex";
 				} else {
-					name += (it.next().charAt(0) + ".");
+					name += it.next().charAt(0) + ".";
 				}
 			}
 
@@ -345,56 +345,52 @@ public class MongoPersistentEntityIndexResolver implements IndexResolver {
 	private void appendTextIndexInformation(DotPath dotPath, Path path, TextIndexDefinitionBuilder indexDefinitionBuilder,
 			MongoPersistentEntity<?> entity, TextIndexIncludeOptions includeOptions, CycleGuard guard) {
 
-		entity.doWithProperties(new PropertyHandler<MongoPersistentProperty>() {
+		entity.doWithProperties(persistentProperty -> {
 
-			@Override
-			public void doWithPersistentProperty(MongoPersistentProperty persistentProperty) {
+			guard.protect(persistentProperty, path);
 
-				guard.protect(persistentProperty, path);
-
-				if (persistentProperty.isExplicitLanguageProperty() && dotPath.isEmpty()) {
-					indexDefinitionBuilder.withLanguageOverride(persistentProperty.getFieldName());
-				}
-
-				if (persistentProperty.isMap()) {
-					return;
-				}
-
-				TextIndexed indexed = persistentProperty.findAnnotation(TextIndexed.class);
-
-				if (includeOptions.isForce() || indexed != null || persistentProperty.isEntity()) {
-
-					DotPath propertyDotPath = dotPath.append(persistentProperty.getFieldName());
-
-					Path propertyPath = path.append(persistentProperty);
-
-					TextIndexedFieldSpec parentFieldSpec = includeOptions.getParentFieldSpec();
-					Float weight = indexed != null ? indexed.weight()
-							: (parentFieldSpec != null ? parentFieldSpec.getWeight() : 1.0F);
-
-					if (persistentProperty.isEntity()) {
-
-						TextIndexIncludeOptions optionsForNestedType = includeOptions;
-						if (!IncludeStrategy.FORCE.equals(includeOptions.getStrategy()) && indexed != null) {
-							optionsForNestedType = new TextIndexIncludeOptions(IncludeStrategy.FORCE,
-									new TextIndexedFieldSpec(propertyDotPath.toString(), weight));
-						}
-
-						try {
-							appendTextIndexInformation(propertyDotPath, propertyPath, indexDefinitionBuilder,
-									mappingContext.getPersistentEntity(persistentProperty.getActualType()), optionsForNestedType, guard);
-						} catch (CyclicPropertyReferenceException e) {
-							LOGGER.info(e.getMessage());
-						} catch (InvalidDataAccessApiUsageException e) {
-							LOGGER.info(String.format("Potentially invalid index structure discovered; Breaking operation for %s",
-									entity.getName()), e);
-						}
-					} else if (includeOptions.isForce() || indexed != null) {
-						indexDefinitionBuilder.onField(propertyDotPath.toString(), weight);
-					}
-				}
-
+			if (persistentProperty.isExplicitLanguageProperty() && dotPath.isEmpty()) {
+				indexDefinitionBuilder.withLanguageOverride(persistentProperty.getFieldName());
 			}
+
+			if (persistentProperty.isMap()) {
+				return;
+			}
+
+			TextIndexed indexed = persistentProperty.findAnnotation(TextIndexed.class);
+
+			if (includeOptions.isForce() || indexed != null || persistentProperty.isEntity()) {
+
+				DotPath propertyDotPath = dotPath.append(persistentProperty.getFieldName());
+
+				Path propertyPath = path.append(persistentProperty);
+
+				TextIndexedFieldSpec parentFieldSpec = includeOptions.getParentFieldSpec();
+				Float weight = indexed != null ? indexed.weight()
+						: (parentFieldSpec != null ? parentFieldSpec.getWeight() : 1.0F);
+
+				if (persistentProperty.isEntity()) {
+
+					TextIndexIncludeOptions optionsForNestedType = includeOptions;
+					if (!IncludeStrategy.FORCE.equals(includeOptions.getStrategy()) && indexed != null) {
+						optionsForNestedType = new TextIndexIncludeOptions(IncludeStrategy.FORCE,
+								new TextIndexedFieldSpec(propertyDotPath.toString(), weight));
+					}
+
+					try {
+						appendTextIndexInformation(propertyDotPath, propertyPath, indexDefinitionBuilder,
+								mappingContext.getPersistentEntity(persistentProperty.getActualType()), optionsForNestedType, guard);
+					} catch (CyclicPropertyReferenceException e) {
+						LOGGER.info(e.getMessage());
+					} catch (InvalidDataAccessApiUsageException e) {
+						LOGGER.info(String.format("Potentially invalid index structure discovered; Breaking operation for %s",
+								entity.getName()), e);
+					}
+				} else if (includeOptions.isForce() || indexed != null) {
+					indexDefinitionBuilder.onField(propertyDotPath.toString(), weight);
+				}
+			}
+
 		});
 
 	}
@@ -885,7 +881,7 @@ public class MongoPersistentEntityIndexResolver implements IndexResolver {
 		 * @author Christoph Strobl
 		 * @author Mark Paluch
 		 */
-		static class Path {
+		static final class Path {
 
 			private static final Path EMPTY = new Path(Collections.emptyList(), false);
 
@@ -997,10 +993,12 @@ public class MongoPersistentEntityIndexResolver implements IndexResolver {
 
 			@Override
 			public boolean equals(@Nullable Object o) {
-				if (this == o)
+				if (this == o) {
 					return true;
-				if (o == null || getClass() != o.getClass())
+				}
+				if (o == null || getClass() != o.getClass()) {
 					return false;
+				}
 
 				Path that = (Path) o;
 
@@ -1115,7 +1113,7 @@ public class MongoPersistentEntityIndexResolver implements IndexResolver {
 	static class TextIndexIncludeOptions {
 
 		enum IncludeStrategy {
-			FORCE, DEFAULT;
+			FORCE, DEFAULT
 		}
 
 		private final IncludeStrategy strategy;

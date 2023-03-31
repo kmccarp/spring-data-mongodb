@@ -82,11 +82,11 @@ public class VariableOperators {
 	/**
 	 * {@link AggregationExpression} for {@code $map}.
 	 */
-	public static class Map implements AggregationExpression {
+	public static final class Map implements AggregationExpression {
 
-		private Object sourceArray;
-		private String itemVariableName;
-		private AggregationExpression functionToApply;
+		private final Object sourceArray;
+		private final String itemVariableName;
+		private final AggregationExpression functionToApply;
 
 		private Map(Object sourceArray, String itemVariableName, AggregationExpression functionToApply) {
 
@@ -110,24 +110,15 @@ public class VariableOperators {
 
 			Assert.notNull(fieldReference, "FieldReference must not be null");
 
-			return new AsBuilder() {
+			return variableName -> {
 
-				@Override
-				public FunctionBuilder as(final String variableName) {
+				Assert.notNull(variableName, "VariableName must not be null");
 
-					Assert.notNull(variableName, "VariableName must not be null");
+				return expression -> {
 
-					return new FunctionBuilder() {
-
-						@Override
-						public Map andApply(final AggregationExpression expression) {
-
-							Assert.notNull(expression, "AggregationExpression must not be null");
-							return new Map(Fields.field(fieldReference), variableName, expression);
-						}
-					};
-				}
-
+					Assert.notNull(expression, "AggregationExpression must not be null");
+					return new Map(Fields.field(fieldReference), variableName, expression);
+				};
 			};
 		}
 
@@ -142,23 +133,15 @@ public class VariableOperators {
 
 			Assert.notNull(source, "AggregationExpression must not be null");
 
-			return new AsBuilder() {
+			return variableName -> {
 
-				@Override
-				public FunctionBuilder as(final String variableName) {
+				Assert.notNull(variableName, "VariableName must not be null");
 
-					Assert.notNull(variableName, "VariableName must not be null");
+				return expression -> {
 
-					return new FunctionBuilder() {
-
-						@Override
-						public Map andApply(final AggregationExpression expression) {
-
-							Assert.notNull(expression, "AggregationExpression must not be null");
-							return new Map(source, variableName, expression);
-						}
-					};
-				}
+					Assert.notNull(expression, "AggregationExpression must not be null");
+					return new Map(source, variableName, expression);
+				};
 			};
 		}
 
@@ -220,7 +203,7 @@ public class VariableOperators {
 	 * @author Christoph Strobl
 	 * @since 1.10
 	 */
-	public static class Let implements AggregationExpression {
+	public static final class Let implements AggregationExpression {
 
 		private final List<ExpressionVariable> vars;
 
@@ -342,7 +325,7 @@ public class VariableOperators {
 		/**
 		 * @author Christoph Strobl
 		 */
-		public static class ExpressionVariable {
+		public static final class ExpressionVariable {
 
 			private final @Nullable String variableName;
 			private final @Nullable Object expression;

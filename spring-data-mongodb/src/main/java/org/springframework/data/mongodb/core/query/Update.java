@@ -55,7 +55,7 @@ public class Update implements UpdateDefinition {
 		LAST, FIRST
 	}
 
-	private boolean isolated = false;
+	private boolean isolated;
 	private final Set<String> keysToUpdate = new HashSet<>();
 	private final Map<String, Object> modifierOps = new LinkedHashMap<>();
 	private Map<String, PushOperatorBuilder> pushCommandBuilders = Collections.emptyMap();
@@ -190,7 +190,7 @@ public class Update implements UpdateDefinition {
 
 		if (!pushCommandBuilders.containsKey(key)) {
 
-			if (pushCommandBuilders == Collections.EMPTY_MAP) {
+			if (pushCommandBuilders == Collections.emptyMap()) {
 				pushCommandBuilders = new LinkedHashMap<>(1);
 			}
 
@@ -394,7 +394,7 @@ public class Update implements UpdateDefinition {
 	 */
 	public Update filterArray(CriteriaDefinition criteria) {
 
-		if (arrayFilters == Collections.EMPTY_LIST) {
+		if (arrayFilters == Collections.emptyList()) {
 			this.arrayFilters = new ArrayList<>();
 		}
 
@@ -413,7 +413,7 @@ public class Update implements UpdateDefinition {
 	 */
 	public Update filterArray(String identifier, Object expression) {
 
-		if (arrayFilters == Collections.EMPTY_LIST) {
+		if (arrayFilters == Collections.emptyList()) {
 			this.arrayFilters = new ArrayList<>();
 		}
 
@@ -524,7 +524,7 @@ public class Update implements UpdateDefinition {
 	 */
 	public static class Modifiers {
 
-		private Map<String, Modifier> modifiers;
+		private final Map<String, Modifier> modifiers;
 
 		public Modifiers() {
 			this.modifiers = new LinkedHashMap<>(1);
@@ -605,7 +605,7 @@ public class Update implements UpdateDefinition {
 	 * @author Christoph Strobl
 	 * @since 2.0
 	 */
-	private static abstract class AbstractModifier implements Modifier {
+	private abstract static class AbstractModifier implements Modifier {
 
 		@Override
 		public int hashCode() {
@@ -644,7 +644,7 @@ public class Update implements UpdateDefinition {
 	 */
 	private static class Each extends AbstractModifier {
 
-		private Object[] values;
+		private final Object[] values;
 
 		Each(Object... values) {
 			this.values = extractValues(values);
@@ -707,7 +707,7 @@ public class Update implements UpdateDefinition {
 	 */
 	private static class Slice extends AbstractModifier {
 
-		private int count;
+		private final int count;
 
 		Slice(int count) {
 			this.count = count;

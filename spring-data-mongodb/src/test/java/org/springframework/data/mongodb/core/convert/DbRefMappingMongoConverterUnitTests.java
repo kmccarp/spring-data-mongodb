@@ -770,6 +770,8 @@ class DbRefMappingMongoConverterUnitTests {
 	@SuppressWarnings("serial")
 	static class LazyDbRefTargetWithPeristenceConstructor extends LazyDbRefTarget {
 
+		private static final long serialVersionUID = 1;
+
 		boolean persistenceConstructorCalled;
 
 		public LazyDbRefTargetWithPeristenceConstructor() {}
@@ -787,6 +789,8 @@ class DbRefMappingMongoConverterUnitTests {
 
 	@SuppressWarnings("serial")
 	static class LazyDbRefTargetWithPeristenceConstructorWithoutDefaultConstructor extends LazyDbRefTarget {
+
+		private static final long serialVersionUID = 1;
 
 		boolean persistenceConstructorCalled;
 
@@ -849,23 +853,30 @@ class DbRefMappingMongoConverterUnitTests {
 
 		@Override
 		public boolean equals(@Nullable Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			EqualsAndHashCodeObjectMethodOverrideLazyDbRefTarget other = (EqualsAndHashCodeObjectMethodOverrideLazyDbRefTarget) obj;
 			if (id == null) {
-				if (other.id != null)
+				if (other.id != null) {
 					return false;
-			} else if (!id.equals(other.id))
+				}
+			} else if (!id.equals(other.id)) {
 				return false;
+			}
 			if (value == null) {
-				if (other.value != null)
+				if (other.value != null) {
 					return false;
-			} else if (!value.equals(other.value))
+				}
+			} else if (!value.equals(other.value)) {
 				return false;
+			}
 			return true;
 		}
 	}

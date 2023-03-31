@@ -52,7 +52,7 @@ public class DefaultMessageListenerContainer implements MessageListenerContainer
 	private final Object lifecycleMonitor = new Object();
 	private final Map<SubscriptionRequest, Subscription> subscriptions = new LinkedHashMap<>();
 
-	private boolean running = false;
+	private boolean running;
 
 	/**
 	 * Create a new {@link DefaultMessageListenerContainer}.
@@ -117,7 +117,7 @@ public class DefaultMessageListenerContainer implements MessageListenerContainer
 
 			subscriptions.values().stream() //
 					.filter(it -> !it.isActive()) //
-					.filter(it -> it instanceof TaskSubscription) //
+					.filter(TaskSubscription.class::isInstance) //
 					.map(TaskSubscription.class::cast) //
 					.map(TaskSubscription::getTask) //
 					.forEach(taskExecutor::execute);
@@ -158,7 +158,7 @@ public class DefaultMessageListenerContainer implements MessageListenerContainer
 			Class<T> bodyType) {
 
 		return register(request, bodyType, errorHandler.orElseGet(
-				() -> new DecoratingLoggingErrorHandler((exception) -> lookup(request).ifPresent(Subscription::cancel))));
+				() -> new DecoratingLoggingErrorHandler(exception -> lookup(request).ifPresent(Subscription::cancel))));
 	}
 
 	@Override
@@ -245,10 +245,12 @@ public class DefaultMessageListenerContainer implements MessageListenerContainer
 
 		@Override
 		public boolean equals(@Nullable Object o) {
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
 
 			TaskSubscription that = (TaskSubscription) o;
 

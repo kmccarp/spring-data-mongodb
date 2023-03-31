@@ -47,6 +47,6 @@ public class MongoDbFactoryNoDatabaseRunningTests {
 	@Test
 	public void failsDataAccessWithoutADatabaseRunning() {
 		assertThatExceptionOfType(DataAccessResourceFailureException.class)
-				.isThrownBy(() -> mongoTemplate.getCollectionNames());
+				.isThrownBy(mongoTemplate::getCollectionNames);
 	}
 }

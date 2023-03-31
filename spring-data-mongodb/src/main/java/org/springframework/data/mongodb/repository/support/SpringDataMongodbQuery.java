@@ -239,7 +239,7 @@ public class SpringDataMongodbQuery<T> extends SpringDataMongodbQuerySupport<Spr
 		if (offset != null) {
 			basicQuery.skip(offset);
 		}
-		if (orderBy.size() > 0) {
+		if (!orderBy.isEmpty()) {
 			basicQuery.setSortObject(createSort(orderBy));
 		}
 

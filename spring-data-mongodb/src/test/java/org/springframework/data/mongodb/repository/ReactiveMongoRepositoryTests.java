@@ -94,7 +94,13 @@ class ReactiveMongoRepositoryTests implements DirtiesStateExtension.StateFunctio
 	@Autowired ReactiveContactRepository contactRepository;
 	@Autowired ReactiveCappedCollectionRepository cappedRepository;
 
-	private Person dave, oliver, carter, boyd, stefan, leroi, alicia;
+	private Person dave;
+	private Person oliver;
+	private Person carter;
+	private Person boyd;
+	private Person stefan;
+	private Person leroi;
+	private Person alicia;
 	private QPerson person = QPerson.person;
 
 	@Configuration

@@ -15,8 +15,8 @@
  */
 package org.springframework.data.mongodb.core;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -90,9 +90,7 @@ class MongoTemplateScrollTests {
 		});
 
 		cfg.configureAuditing(it -> {
-			it.auditingHandler(ctx -> {
-				return new IsNewAwareAuditingHandler(PersistentEntities.of(ctx));
-			});
+			it.auditingHandler(ctx -> new IsNewAwareAuditingHandler(PersistentEntities.of(ctx)));
 		});
 	});
 
@@ -167,14 +165,14 @@ class MongoTemplateScrollTests {
 	@Test // GH-4308
 	void shouldAllowReverseSort() {
 
-		Person jane_20 = new Person("Jane", 20);
-		Person jane_40 = new Person("Jane", 40);
-		Person jane_42 = new Person("Jane", 42);
+		Person jane20 = new Person("Jane", 20);
+		Person jane40 = new Person("Jane", 40);
+		Person jane42 = new Person("Jane", 42);
 		Person john20 = new Person("John", 20);
-		Person john40_1 = new Person("John", 40);
-		Person john40_2 = new Person("John", 40);
+		Person john401 = new Person("John", 40);
+		Person john402 = new Person("John", 40);
 
-		template.insertAll(Arrays.asList(john20, john40_1, john40_2, jane_20, jane_40, jane_42));
+		template.insertAll(Arrays.asList(john20, john401, john402, jane20, jane40, jane42));
 		Query q = new Query(where("firstName").regex("J.*")).with(Sort.by("firstName", "age"));
 		q.with(KeysetScrollPosition.initial()).limit(6);
 
@@ -190,14 +188,14 @@ class MongoTemplateScrollTests {
 		window = template.scroll(q.with(reversePosition).limit(2), Person.class);
 
 		assertThat(window).hasSize(2);
-		assertThat(window).containsOnly(jane_42, john20);
+		assertThat(window).containsOnly(jane42, john20);
 		assertThat(window.hasNext()).isTrue();
 		assertThat(window.isLast()).isFalse();
 
 		window = template.scroll(q.with(window.positionAt(0)).limit(2), Person.class);
 
 		assertThat(window).hasSize(2);
-		assertThat(window).containsOnly(john20, john40_1);
+		assertThat(window).containsOnly(john20, john401);
 		assertThat(window.hasNext()).isTrue();
 		assertThat(window.isLast()).isFalse();
 	}
@@ -288,13 +286,8 @@ class MongoTemplateScrollTests {
 
 	static Stream<Arguments> renamedFieldProjectTargets() {
 		return Stream.of(Arguments.of(WithRenamedField.class, Function.identity()),
-				Arguments.of(Document.class, new Function<WithRenamedField, Document>() {
-					@Override
-					public Document apply(WithRenamedField withRenamedField) {
-						return new Document("_id", withRenamedField.getId()).append("_val", withRenamedField.getValue())
-								.append("_class", WithRenamedField.class.getName());
-					}
-				}));
+				Arguments.of(Document.class, withRenamedField -> new Document("_id", withRenamedField.getId()).append("_val", withRenamedField.getValue())
+						.append("_class", WithRenamedField.class.getName())));
 	}
 
 	static <T> org.assertj.core.api.IterableAssert<T> assertWindow(Window<T> window, @Nullable Comparator<T> comparator) {
@@ -362,10 +355,7 @@ class MongoTemplateScrollTests {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof Proxy) {
-				return true;
-			}
-			return false;
+			return o instanceof Proxy;
 		}
 
 		@Override

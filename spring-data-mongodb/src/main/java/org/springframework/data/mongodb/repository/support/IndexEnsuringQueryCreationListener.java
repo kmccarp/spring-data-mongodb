@@ -54,7 +54,7 @@ import com.mongodb.MongoException;
  */
 class IndexEnsuringQueryCreationListener implements QueryCreationListener<PartTreeMongoQuery> {
 
-	private static final Set<Type> GEOSPATIAL_TYPES = new HashSet<Type>(Arrays.asList(Type.NEAR, Type.WITHIN));
+	private static final Set<Type> GEOSPATIAL_TYPES = new HashSet<>(Arrays.asList(Type.NEAR, Type.WITHIN));
 	private static final Log LOG = LogFactory.getLog(IndexEnsuringQueryCreationListener.class);
 
 	private final IndexOperationsProvider indexOperationsProvider;

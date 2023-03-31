@@ -64,6 +64,8 @@ import com.mongodb.client.ClientSession;
 public class MongoTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	private static final long serialVersionUID = 1;
+
 	private @Nullable MongoDatabaseFactory dbFactory;
 	private @Nullable TransactionOptions options;
 

@@ -190,9 +190,7 @@ public class ReactiveMongoTemplateTests {
 
 		template.save(source).then().as(StepVerifier::create).verifyComplete();
 
-		template.execute(RawStringId.class, collection -> {
-			return collection.find(new org.bson.Document()).first();
-		}) //
+		template.execute(RawStringId.class, collection -> collection.find(new org.bson.Document()).first()) //
 				.map(it -> it.get("_id")) //
 				.as(StepVerifier::create) //
 				.consumeNextWith(id -> {
@@ -208,9 +206,7 @@ public class ReactiveMongoTemplateTests {
 
 		template.insert(source).then().as(StepVerifier::create).verifyComplete();
 
-		template.execute(RawStringId.class, collection -> {
-					return collection.find(new org.bson.Document()).first();
-				}) //
+		template.execute(RawStringId.class, collection -> collection.find(new org.bson.Document()).first()) //
 				.map(it -> it.get("_id")) //
 				.as(StepVerifier::create) //
 				.consumeNextWith(id -> {
@@ -747,9 +743,7 @@ public class ReactiveMongoTemplateTests {
 					assertThat(actual.getAddress()).isEqualTo(person.address);
 				}).verifyComplete();
 
-		template.execute(MongoTemplateTests.MyPerson.class, collection -> {
-			return collection.find(new org.bson.Document("name", "Heisenberg")).first();
-		}).as(StepVerifier::create) //
+		template.execute(MongoTemplateTests.MyPerson.class, collection -> collection.find(new org.bson.Document("name", "Heisenberg")).first()).as(StepVerifier::create) //
 				.consumeNextWith(loaded -> {
 					assertThat(loaded.get("_id")).isEqualTo(new ObjectId(person.id));
 				}).verifyComplete();
@@ -1474,7 +1468,7 @@ public class ReactiveMongoTemplateTests {
 
 		try {
 			assertThat(documents.stream().map(ChangeStreamEvent::getBody).collect(Collectors.toList())).hasSize(3)
-					.allMatch(val -> val instanceof Document);
+					.allMatch(Document.class::isInstance);
 		} finally {
 			disposable.dispose();
 		}

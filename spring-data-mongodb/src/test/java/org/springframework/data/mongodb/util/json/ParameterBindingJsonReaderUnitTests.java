@@ -222,7 +222,7 @@ class ParameterBindingJsonReaderUnitTests {
 		};
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader("{ 'name':'?0' }",
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target).isEqualTo(new Document("name", "value"));
@@ -304,7 +304,7 @@ class ParameterBindingJsonReaderUnitTests {
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(
 				"{ 'isBatman' : ?#{ T(" + this.getClass().getName() + ").isBatman() ? [0] : [1] }}",
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target).isEqualTo(new Document("isBatman", "nooo"));
@@ -319,7 +319,7 @@ class ParameterBindingJsonReaderUnitTests {
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(
 				"{ 'isBatman' : ?#{ T(" + this.getClass().getName() + ").isBatman() ? '?0' : '?1' }}",
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target).isEqualTo(new Document("isBatman", "nooo"));
@@ -334,7 +334,7 @@ class ParameterBindingJsonReaderUnitTests {
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(
 				"{ 'isBatman' : \"?#{ T(" + this.getClass().getName() + ").isBatman() ? '?0' : '?1' }\" }",
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target).isEqualTo(new Document("isBatman", "nooo"));
@@ -352,7 +352,7 @@ class ParameterBindingJsonReaderUnitTests {
 				+ ").isBatman() ? {'_class': { '$eq' : 'region' }} : { '$and' : { {'_class': { '$eq' : 'region' } }, {'user.supervisor':  principal.id } } } }";
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target)
@@ -366,7 +366,7 @@ class ParameterBindingJsonReaderUnitTests {
 		Object[] args = new Object[] { "1", "2" };
 		String json = "?#{ true ? { 'name': #name } : { 'name' : #name + 'trouble' } }";
 
-		new ParameterBindingDocumentCodec().captureExpressionDependencies(json, (index) -> args[index],
+		new ParameterBindingDocumentCodec().captureExpressionDependencies(json, index -> args[index],
 				new SpelExpressionParser());
 	}
 
@@ -379,7 +379,7 @@ class ParameterBindingJsonReaderUnitTests {
 				.getEvaluationContext(args);
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 		assertThat(target).isEqualTo(new Document("name", "expected"));
@@ -395,7 +395,7 @@ class ParameterBindingJsonReaderUnitTests {
 
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() -> {
 			ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-					new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+					new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 
 			new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 		});
@@ -410,7 +410,7 @@ class ParameterBindingJsonReaderUnitTests {
 				.getEvaluationContext(args);
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
@@ -428,7 +428,7 @@ class ParameterBindingJsonReaderUnitTests {
 		String json = "?#{  T(" + this.getClass().getName() + ").applyFilterByUser('?0' ,principal.id) }";
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target)
@@ -446,7 +446,7 @@ class ParameterBindingJsonReaderUnitTests {
 		String json = "?0";
 
 		ParameterBindingJsonReader reader = new ParameterBindingJsonReader(json,
-				new ParameterBindingContext((index) -> args[index], new SpelExpressionParser(), evaluationContext));
+				new ParameterBindingContext(index -> args[index], new SpelExpressionParser(), evaluationContext));
 		Document target = new ParameterBindingDocumentCodec().decode(reader, DecoderContext.builder().build());
 
 		assertThat(target).isEqualTo(new Document("itWorks", true));
@@ -559,11 +559,10 @@ class ParameterBindingJsonReaderUnitTests {
 	}
 
 	public static String applyFilterByUser(String _class, String username) {
-		switch (username) {
-			case "batman":
-				return "{'_class': { '$eq' : '" + _class + "' }}";
-			default:
-				return "{ '$and' : [ {'_class': { '$eq' : '" + _class + "' } }, {'user.supervisor':  '" + username + "' } ] }";
+		if ("batman".equals(username)) {
+			return "{'_class': { '$eq' : '" + _class + "' }}";
+		} else {
+			return "{ '$and' : [ {'_class': { '$eq' : '" + _class + "' } }, {'user.supervisor':  '" + username + "' } ] }";
 		}
 	}
 

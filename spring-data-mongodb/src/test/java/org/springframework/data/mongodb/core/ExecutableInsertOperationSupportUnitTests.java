@@ -49,7 +49,8 @@ public class ExecutableInsertOperationSupportUnitTests {
 
 	private ExecutableInsertOperationSupport ops;
 
-	private Person luke, han;
+	private Person luke;
+	private Person han;
 
 	@BeforeEach
 	void setUp() {

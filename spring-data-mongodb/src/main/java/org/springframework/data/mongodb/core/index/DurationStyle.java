@@ -176,7 +176,7 @@ enum DurationStyle {
 
 		private final String suffix;
 
-		private Function<Duration, Long> longValue;
+		private final Function<Duration, Long> longValue;
 
 		Unit(ChronoUnit chronoUnit, String suffix, Function<Duration, Long> toUnit) {
 			this.chronoUnit = chronoUnit;

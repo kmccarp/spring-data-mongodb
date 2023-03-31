@@ -942,7 +942,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Abs extends AbstractAggregationExpression {
+	public static final class Abs extends AbstractAggregationExpression {
 
 		private Abs(Object value) {
 			super(value);
@@ -1082,7 +1082,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Ceil extends AbstractAggregationExpression {
+	public static final class Ceil extends AbstractAggregationExpression {
 
 		private Ceil(Object value) {
 			super(value);
@@ -1135,7 +1135,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Divide extends AbstractAggregationExpression {
+	public static final class Divide extends AbstractAggregationExpression {
 
 		private Divide(List<?> value) {
 			super(value);
@@ -1222,7 +1222,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Exp extends AbstractAggregationExpression {
+	public static final class Exp extends AbstractAggregationExpression {
 
 		private Exp(Object value) {
 			super(value);
@@ -1275,7 +1275,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Floor extends AbstractAggregationExpression {
+	public static final class Floor extends AbstractAggregationExpression {
 
 		private Floor(Object value) {
 			super(value);
@@ -1328,7 +1328,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Ln extends AbstractAggregationExpression {
+	public static final class Ln extends AbstractAggregationExpression {
 
 		private Ln(Object value) {
 			super(value);
@@ -1381,7 +1381,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Log extends AbstractAggregationExpression {
+	public static final class Log extends AbstractAggregationExpression {
 
 		private Log(List<?> values) {
 			super(values);
@@ -1468,7 +1468,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Log10 extends AbstractAggregationExpression {
+	public static final class Log10 extends AbstractAggregationExpression {
 
 		private Log10(Object value) {
 			super(value);
@@ -1521,7 +1521,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Mod extends AbstractAggregationExpression {
+	public static final class Mod extends AbstractAggregationExpression {
 
 		private Mod(Object value) {
 			super(value);
@@ -1608,7 +1608,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Multiply extends AbstractAggregationExpression {
+	public static final class Multiply extends AbstractAggregationExpression {
 
 		private Multiply(List<?> value) {
 			super(value);
@@ -1695,7 +1695,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Pow extends AbstractAggregationExpression {
+	public static final class Pow extends AbstractAggregationExpression {
 
 		private Pow(List<?> value) {
 			super(value);
@@ -1782,7 +1782,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Sqrt extends AbstractAggregationExpression {
+	public static final class Sqrt extends AbstractAggregationExpression {
 
 		private Sqrt(Object value) {
 			super(value);
@@ -1835,7 +1835,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Subtract extends AbstractAggregationExpression {
+	public static final class Subtract extends AbstractAggregationExpression {
 
 		private Subtract(List<?> value) {
 			super(value);
@@ -1922,7 +1922,7 @@ public class ArithmeticOperators {
 	 *
 	 * @author Christoph Strobl
 	 */
-	public static class Trunc extends AbstractAggregationExpression {
+	public static final class Trunc extends AbstractAggregationExpression {
 
 		private Trunc(Object value) {
 			super(value);
@@ -1983,7 +1983,7 @@ public class ArithmeticOperators {
 	 *
 	 * @since 3.0
 	 */
-	public static class Round extends AbstractAggregationExpression {
+	public static final class Round extends AbstractAggregationExpression {
 
 		private Round(Object value) {
 			super(value);
@@ -2073,7 +2073,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Derivative extends AbstractAggregationExpression {
+	public static final class Derivative extends AbstractAggregationExpression {
 
 		private Derivative(Object value) {
 			super(value);
@@ -2121,7 +2121,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Integral extends AbstractAggregationExpression {
+	public static final class Integral extends AbstractAggregationExpression {
 
 		private Integral(Object value) {
 			super(value);
@@ -2180,7 +2180,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Sin extends AbstractAggregationExpression {
+	public static final class Sin extends AbstractAggregationExpression {
 
 		private Sin(Object value) {
 			super(value);
@@ -2282,7 +2282,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Sinh extends AbstractAggregationExpression {
+	public static final class Sinh extends AbstractAggregationExpression {
 
 		private Sinh(Object value) {
 			super(value);
@@ -2386,7 +2386,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.3
 	 */
-	public static class ASin extends AbstractAggregationExpression {
+	public static final class ASin extends AbstractAggregationExpression {
 
 		private ASin(Object value) {
 			super(value);
@@ -2438,7 +2438,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.3
 	 */
-	public static class ASinh extends AbstractAggregationExpression {
+	public static final class ASinh extends AbstractAggregationExpression {
 
 		private ASinh(Object value) {
 			super(value);
@@ -2488,7 +2488,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Cos extends AbstractAggregationExpression {
+	public static final class Cos extends AbstractAggregationExpression {
 
 		private Cos(Object value) {
 			super(value);
@@ -2588,7 +2588,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Cosh extends AbstractAggregationExpression {
+	public static final class Cosh extends AbstractAggregationExpression {
 
 		private Cosh(Object value) {
 			super(value);
@@ -2690,7 +2690,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.4
 	 */
-	public static class ACos extends AbstractAggregationExpression {
+	public static final class ACos extends AbstractAggregationExpression {
 
 		private ACos(Object value) {
 			super(value);
@@ -2742,7 +2742,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.4
 	 */
-	public static class ACosh extends AbstractAggregationExpression {
+	public static final class ACosh extends AbstractAggregationExpression {
 
 		private ACosh(Object value) {
 			super(value);
@@ -2792,7 +2792,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Tan extends AbstractAggregationExpression {
+	public static final class Tan extends AbstractAggregationExpression {
 
 		private Tan(Object value) {
 			super(value);
@@ -2891,7 +2891,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.3
 	 */
-	public static class ATan extends AbstractAggregationExpression {
+	public static final class ATan extends AbstractAggregationExpression {
 
 		private ATan(Object value) {
 			super(value);
@@ -2943,7 +2943,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.3
 	 */
-	public static class ATan2 extends AbstractAggregationExpression {
+	public static final class ATan2 extends AbstractAggregationExpression {
 
 		private ATan2(List<?> value) {
 			super(value);
@@ -3027,7 +3027,7 @@ public class ArithmeticOperators {
 	 * @author Christoph Strobl
 	 * @since 3.3
 	 */
-	public static class Tanh extends AbstractAggregationExpression {
+	public static final class Tanh extends AbstractAggregationExpression {
 
 		private Tanh(Object value) {
 			super(value);
@@ -3129,7 +3129,7 @@ public class ArithmeticOperators {
 	 * @author Divya Srivastava
 	 * @since 3.3
 	 */
-	public static class ATanh extends AbstractAggregationExpression {
+	public static final class ATanh extends AbstractAggregationExpression {
 
 		private ATanh(Object value) {
 			super(value);

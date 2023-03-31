@@ -39,7 +39,7 @@ public class OperatorNode extends ExpressionNode {
 
 	static {
 
-		Map<String, String> map = new HashMap<String, String>(14, 1);
+		Map<String, String> map = new HashMap<>(14, 1);
 
 		map.put("+", "$add");
 		map.put("-", "$subtract");
@@ -59,7 +59,7 @@ public class OperatorNode extends ExpressionNode {
 
 		OPERATORS = Collections.unmodifiableMap(map);
 
-		Set<Class> set = new HashSet<Class>(12, 1);
+		Set<Class> set = new HashSet<>(12, 1);
 		set.add(OpMinus.class);
 		set.add(OpPlus.class);
 		set.add(OpMultiply.class);

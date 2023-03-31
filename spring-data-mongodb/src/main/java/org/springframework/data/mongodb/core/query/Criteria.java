@@ -76,15 +76,15 @@ public class Criteria implements CriteriaDefinition {
 
 	private @Nullable String key;
 	private List<Criteria> criteriaChain;
-	private LinkedHashMap<String, Object> criteria = new LinkedHashMap<String, Object>();
+	private LinkedHashMap<String, Object> criteria = new LinkedHashMap<>();
 	private @Nullable Object isValue = NOT_SET;
 
 	public Criteria() {
-		this.criteriaChain = new ArrayList<Criteria>();
+		this.criteriaChain = new ArrayList<>();
 	}
 
 	public Criteria(String key) {
-		this.criteriaChain = new ArrayList<Criteria>();
+		this.criteriaChain = new ArrayList<>();
 		this.criteriaChain.add(this);
 		this.key = key;
 	}
@@ -367,7 +367,7 @@ public class Criteria implements CriteriaDefinition {
 	 * @see <a href="https://docs.mongodb.com/manual/reference/operator/query/mod/">MongoDB Query operator: $mod</a>
 	 */
 	public Criteria mod(Number value, Number remainder) {
-		List<Object> l = new ArrayList<Object>(2);
+		List<Object> l = new ArrayList<>(2);
 		l.add(value);
 		l.add(remainder);
 		criteria.put("$mod", l);

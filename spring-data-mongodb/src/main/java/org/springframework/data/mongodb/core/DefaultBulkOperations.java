@@ -463,11 +463,10 @@ class DefaultBulkOperations implements BulkOperations {
 
 		BulkWriteOptions options = new BulkWriteOptions();
 
-		switch (bulkMode) {
-			case ORDERED:
-				return options.ordered(true);
-			case UNORDERED:
-				return options.ordered(false);
+		if (bulkMode == BulkOperations.BulkMode.ORDERED) {
+			return options.ordered(true);
+		} else if (bulkMode == BulkOperations.BulkMode.UNORDERED) {
+			return options.ordered(false);
 		}
 
 		throw new IllegalStateException("BulkMode was null");
@@ -551,15 +550,18 @@ class DefaultBulkOperations implements BulkOperations {
 
 		@Override
 		public boolean equals(@Nullable Object o) {
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
 
 			BulkOperationContext that = (BulkOperationContext) o;
 
-			if (bulkMode != that.bulkMode)
+			if (bulkMode != that.bulkMode) {
 				return false;
+			}
 			if (!ObjectUtils.nullSafeEquals(this.entity, that.entity)) {
 				return false;
 			}
@@ -620,10 +622,12 @@ class DefaultBulkOperations implements BulkOperations {
 
 		@Override
 		public boolean equals(@Nullable Object o) {
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
 
 			SourceAwareWriteModelHolder that = (SourceAwareWriteModelHolder) o;
 

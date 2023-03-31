@@ -110,7 +110,7 @@ public final class ExposedFields implements Iterable<ExposedField> {
 	private static ExposedFields createFields(Fields fields, boolean synthetic) {
 
 		Assert.notNull(fields, "Fields must not be null");
-		List<ExposedField> result = new ArrayList<ExposedField>(fields.size());
+		List<ExposedField> result = new ArrayList<>(fields.size());
 
 		for (Field field : fields) {
 			result.add(new ExposedField(field, synthetic));
@@ -141,7 +141,7 @@ public final class ExposedFields implements Iterable<ExposedField> {
 
 		Assert.notNull(field, "Exposed field must not be null");
 
-		ArrayList<ExposedField> result = new ArrayList<ExposedField>();
+		ArrayList<ExposedField> result = new ArrayList<>();
 		result.addAll(field.synthetic ? syntheticFields : originalFields);
 		result.add(field);
 
@@ -212,7 +212,7 @@ public final class ExposedFields implements Iterable<ExposedField> {
 	@Override
 	public Iterator<ExposedField> iterator() {
 
-		CompositeIterator<ExposedField> iterator = new CompositeIterator<ExposedField>();
+		CompositeIterator<ExposedField> iterator = new CompositeIterator<>();
 		if (!syntheticFields.isEmpty()) {
 			iterator.add(syntheticFields.iterator());
 		}
@@ -416,7 +416,7 @@ public final class ExposedFields implements Iterable<ExposedField> {
 	 */
 	static class ExpressionFieldReference implements FieldReference {
 
-		private FieldReference delegate;
+		private final FieldReference delegate;
 
 		/**
 		 * Creates a new {@link FieldReference} for the given {@link ExposedField}.

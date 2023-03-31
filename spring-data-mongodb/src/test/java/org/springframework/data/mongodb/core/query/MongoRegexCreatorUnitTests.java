@@ -71,7 +71,8 @@ public class MongoRegexCreatorUnitTests {
 
 		private final String source;
 		private final MatchMode mode;
-		private final String expectedResult, comment;
+		private final String expectedResult;
+		private final String comment;
 
 		void check() {
 

@@ -42,7 +42,6 @@ import org.springframework.data.mapping.PropertyPath;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.data.mapping.context.InvalidPersistentPropertyPath;
 import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.mapping.model.PropertyValueProvider;
 import org.springframework.data.mongodb.MongoExpression;
 import org.springframework.data.mongodb.core.aggregation.AggregationExpression;
 import org.springframework.data.mongodb.core.aggregation.RelaxedTypeBasedAggregationOperationContext;
@@ -441,11 +440,8 @@ public class QueryMapper {
 		if (documentField.getProperty() != null
 				&& converter.getCustomConversions().hasValueConverter(documentField.getProperty())) {
 
-			MongoConversionContext conversionContext = new MongoConversionContext(new PropertyValueProvider<>() {
-				@Override
-				public <T> T getPropertyValue(MongoPersistentProperty property) {
-					throw new IllegalStateException("No enclosing property available");
-				}
+			MongoConversionContext conversionContext = new MongoConversionContext(property -> {
+				throw new IllegalStateException("No enclosing property available");
 			}, documentField.getProperty(), converter);
 			PropertyValueConverter<Object, Object, ValueConversionContext<MongoPersistentProperty>> valueConverter = converter
 					.getCustomConversions().getPropertyValueConversions().getValueConverter(documentField.getProperty());
@@ -906,7 +902,7 @@ public class QueryMapper {
 		}
 
 		public boolean isOrOrNor() {
-			return key.equalsIgnoreCase("$or") || key.equalsIgnoreCase("$nor");
+			return "$or".equalsIgnoreCase(key) || "$nor".equalsIgnoreCase(key);
 		}
 
 		/**
@@ -1327,12 +1323,8 @@ public class QueryMapper {
 		}
 
 		private boolean isPathToJavaLangClassProperty(PropertyPath path) {
-
-			if ((path.getType() == Class.class || path.getType().equals(Object.class))
-					&& path.getLeafProperty().getType() == Class.class) {
-				return true;
-			}
-			return false;
+			return (path.getType() == Class.class || path.getType().equals(Object.class))
+					&& path.getLeafProperty().getType() == Class.class;
 		}
 
 		/**

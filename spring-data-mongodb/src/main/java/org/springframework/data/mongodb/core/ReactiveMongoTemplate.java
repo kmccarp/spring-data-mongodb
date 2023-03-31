@@ -413,9 +413,7 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 
 		if (enabled) {
 
-			this.countExecution = (collectionName, filter, options) -> {
-
-				return estimationFilter.apply(filter, options).flatMap(canEstimate -> {
+			this.countExecution = (collectionName, filter, options) -> estimationFilter.apply(filter, options).flatMap(canEstimate -> {
 					if (!canEstimate) {
 						return doExactCount(collectionName, filter, options);
 					}
@@ -427,7 +425,6 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 
 					return doEstimatedCount(collectionName, estimatedDocumentCountOptions);
 				});
-			};
 		} else {
 			this.countExecution = this::doExactCount;
 		}
@@ -534,13 +531,10 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 			@Override
 			public <T> Flux<T> execute(ReactiveSessionCallback<T> action, Consumer<ClientSession> doFinally) {
 
-				return cachedSession.flatMapMany(session -> {
-
-					return ReactiveMongoTemplate.this.withSession(action, session) //
+				return cachedSession.flatMapMany(session -> ReactiveMongoTemplate.this.withSession(action, session) //
 							.doFinally(signalType -> {
 								doFinally.accept(session);
-							});
-				});
+							}));
 			}
 		};
 	}
@@ -705,10 +699,8 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 			options.getCollation().map(Collation::toMongoCollation).ifPresent(viewOptions::collation);
 		}
 
-		return execute(db -> {
-			return Flux.from(db.createView(name, source, pipeline, viewOptions))
-					.then(Mono.fromSupplier(() -> db.getCollection(name)));
-		}).next();
+		return execute(db -> Flux.from(db.createView(name, source, pipeline, viewOptions))
+					.then(Mono.fromSupplier(() -> db.getCollection(name)))).next();
 	}
 
 	@Override
@@ -1325,18 +1317,13 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 					maybeEmitEvent(new BeforeSaveEvent<>(model.getSource(), model.getTarget(), model.getCollection()));
 					return model;
 				})//
-				.flatMap(it -> {
-					return maybeCallBeforeSave(it.getSource(), it.getTarget(), it.getCollection()).map(it::mutate);
-				}).flatMap(it -> {
-
-					return insertDocument(it.getCollection(), it.getTarget(), it.getSource().getClass()).flatMap(id -> {
+				.flatMap(it -> maybeCallBeforeSave(it.getSource(), it.getTarget(), it.getCollection()).map(it::mutate)).flatMap(it -> insertDocument(it.getCollection(), it.getTarget(), it.getSource().getClass()).flatMap(id -> {
 
 						T saved = operations.forEntity(it.getSource(), mongoConverter.getConversionService())
 								.populateIdIfNecessary(id);
 						maybeEmitEvent(new AfterSaveEvent<>(saved, it.getTarget(), collectionName));
 						return maybeCallAfterSave(saved, it.getTarget(), collectionName);
-					});
-				});
+					}));
 	}
 
 	@Override
@@ -1478,14 +1465,11 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 				Document document = mapped.getDocument();
 
 				maybeEmitEvent(new BeforeSaveEvent<>(toConvert, document, collectionName));
-				return maybeCallBeforeSave(toConvert, document, collectionName).flatMap(it -> {
-
-					return doUpdate(collectionName, query, mapped.updateWithoutId(), it.getClass(), false, false)
+				return maybeCallBeforeSave(toConvert, document, collectionName).flatMap(it -> doUpdate(collectionName, query, mapped.updateWithoutId(), it.getClass(), false, false)
 							.flatMap(result -> {
-								maybeEmitEvent(new AfterSaveEvent<T>(it, document, collectionName));
+								maybeEmitEvent(new AfterSaveEvent<>(it, document, collectionName));
 								return maybeCallAfterSave(it, document, collectionName);
-							});
-				});
+							}));
 			});
 		});
 	}
@@ -1496,23 +1480,20 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 
 		return createMono(collectionName, collection -> {
 
-			T toSave = maybeEmitEvent(new BeforeConvertEvent<T>(objectToSave, collectionName)).getSource();
+			T toSave = maybeEmitEvent(new BeforeConvertEvent<>(objectToSave, collectionName)).getSource();
 
 			return maybeCallBeforeConvert(toSave, collectionName).flatMap(toConvert -> {
 
 				AdaptibleEntity<T> entity = operations.forEntity(toConvert, mongoConverter.getConversionService());
 				Document dbDoc = entity.toMappedDocument(writer).getDocument();
-				maybeEmitEvent(new BeforeSaveEvent<T>(toConvert, dbDoc, collectionName));
+				maybeEmitEvent(new BeforeSaveEvent<>(toConvert, dbDoc, collectionName));
 
-				return maybeCallBeforeSave(toConvert, dbDoc, collectionName).flatMap(it -> {
-
-					return saveDocument(collectionName, dbDoc, it.getClass()).flatMap(id -> {
+				return maybeCallBeforeSave(toConvert, dbDoc, collectionName).flatMap(it -> saveDocument(collectionName, dbDoc, it.getClass()).flatMap(id -> {
 
 						T saved = entity.populateIdIfNecessary(id);
 						maybeEmitEvent(new AfterSaveEvent<>(saved, dbDoc, collectionName));
 						return maybeCallAfterSave(saved, dbDoc, collectionName);
-					});
-				});
+					}));
 			});
 		});
 	}
@@ -1564,13 +1545,10 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 
 			return collectionToUse.insertMany(documents);
 
-		}).flatMap(s -> {
-
-			return Flux.fromStream(documents.stream() //
+		}).flatMap(s -> Flux.fromStream(documents.stream() //
 					.map(MappedDocument::of) //
 					.filter(it -> it.isIdPresent(ObjectId.class)) //
-					.map(it -> it.getId(ObjectId.class)));
-		});
+					.map(it -> it.getId(ObjectId.class))));
 	}
 
 	private MongoCollection<Document> prepareCollection(MongoCollection<Document> collection,
@@ -1773,9 +1751,10 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 				if (updateResult.wasAcknowledged() && updateResult.getMatchedCount() == 0) {
 
 					Document updateObj = updateContext.getMappedUpdate(entity);
-					if (containsVersionProperty(queryObj, entity))
+					if (containsVersionProperty(queryObj, entity)) {
 						throw new OptimisticLockingFailureException("Optimistic lock exception on saving entity: "
 								+ updateObj.toString() + " to collection " + collectionName);
+					}
 				}
 			}
 		});
@@ -1896,9 +1875,7 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 						.map(MappedDocument::of) //
 						.map(MappedDocument::getId) //
 						.collectList() //
-						.flatMapMany(val -> {
-							return collectionToUse.deleteMany(MappedDocument.getIdIn(val), deleteOptions);
-						});
+						.flatMapMany(val -> collectionToUse.deleteMany(MappedDocument.getIdIn(val), deleteOptions));
 			} else {
 				return collectionToUse.deleteMany(removeQuery, deleteOptions);
 			}
@@ -2642,10 +2619,8 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 	private <T> Flux<T> executeFindMultiInternal(ReactiveCollectionQueryCallback<Document> collectionCallback,
 			@Nullable FindPublisherPreparer preparer, DocumentCallback<T> objectCallback, String collectionName) {
 
-		return createFlux(collectionName, collection -> {
-			return Flux.from(preparer.initiateFind(collection, collectionCallback::doInCollection))
-					.concatMap(objectCallback::doWith);
-		});
+		return createFlux(collectionName, collection -> Flux.from(preparer.initiateFind(collection, collectionCallback::doInCollection))
+					.concatMap(objectCallback::doWith));
 	}
 
 	/**
@@ -3320,7 +3295,7 @@ public class ReactiveMongoTemplate implements ReactiveMongoOperations, Applicati
 	 * @author Christoph Strobl
 	 * @since 2.2
 	 */
-	private static class PersistableEntityModel<T> {
+	private static final class PersistableEntityModel<T> {
 
 		private final T source;
 		private final @Nullable Document target;

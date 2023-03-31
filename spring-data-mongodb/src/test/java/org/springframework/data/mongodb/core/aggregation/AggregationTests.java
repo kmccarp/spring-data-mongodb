@@ -97,7 +97,7 @@ public class AggregationTests {
 
 	private static final String INPUT_COLLECTION = "aggregation_test_collection";
 
-	private static boolean initialized = false;
+	private static boolean initialized;
 	private static List<Document> documents = parseDocuments();
 
 	@Template //
@@ -2044,7 +2044,7 @@ public class AggregationTests {
 	private static Document createDocument(String title, String... tags) {
 
 		Document doc = new Document("title", title);
-		List<String> tagList = new ArrayList<String>();
+		List<String> tagList = new ArrayList<>();
 
 		for (String tag : tags) {
 			tagList.add(tag);
@@ -2158,7 +2158,7 @@ public class AggregationTests {
 
 	static class CarDescriptor {
 
-		private List<Entry> entries = new ArrayList<AggregationTests.CarDescriptor.Entry>();
+		private List<Entry> entries = new ArrayList<>();
 
 		CarDescriptor(Entry... entries) {
 
@@ -2299,7 +2299,7 @@ public class AggregationTests {
 		String p2;
 	}
 
-	static enum MyEnum {
+	enum MyEnum {
 		ONE, TWO
 	}
 

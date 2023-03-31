@@ -60,9 +60,9 @@ public class MongoClientFactoryBean extends AbstractFactoryBean<MongoClient> imp
 	private @Nullable MongoClientSettings mongoClientSettings;
 	private @Nullable String host;
 	private @Nullable Integer port;
-	private @Nullable List<MongoCredential> credential = null;
+	private @Nullable List<MongoCredential> credential;
 	private @Nullable ConnectionString connectionString;
-	private @Nullable String replicaSet = null;
+	private @Nullable String replicaSet;
 
 	private PersistenceExceptionTranslator exceptionTranslator = DEFAULT_EXCEPTION_TRANSLATOR;
 
@@ -291,7 +291,7 @@ public class MongoClientFactoryBean extends AbstractFactoryBean<MongoClient> imp
 		}
 
 		if (StringUtils.hasText(replicaSet)) {
-			builder.applyToClusterSettings((settings) -> {
+			builder.applyToClusterSettings(settings -> {
 				settings.requiredReplicaSetName(replicaSet);
 			});
 		}

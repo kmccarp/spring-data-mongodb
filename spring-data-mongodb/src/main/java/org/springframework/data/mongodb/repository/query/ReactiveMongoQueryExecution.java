@@ -156,7 +156,7 @@ interface ReactiveMongoQueryExecution {
 		private final ReactiveUpdate<?> updateOps;
 		private final MongoQueryMethod method;
 		private final MongoParameterAccessor accessor;
-		private Mono<UpdateDefinition> update;
+		private final Mono<UpdateDefinition> update;
 
 		UpdateExecution(ReactiveUpdate<?> updateOps, ReactiveMongoQueryMethod method, MongoParameterAccessor accessor,
 				Mono<UpdateDefinition> update) {

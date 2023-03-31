@@ -1590,7 +1590,7 @@ public class QueryMapperUnitTests {
 	}
 
 	enum Enum {
-		INSTANCE;
+		INSTANCE
 	}
 
 	class UserEntity {
